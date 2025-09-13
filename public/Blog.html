@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Entries</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header"> 
+        <a href="#" id="home-link">Home</a>
+        <span class="separator">|</span>
+        <a href="conspire.html">Conspire</a>
+        <span class="separator">|</span>
+        <a href="links.html">Links</a>
+        <span class="separator">|</span>
+        <a href="contact.html">Contact Us</a>
+    </div>
+    <div class="container">
+        <div class="left-column">
+            <div class="profile-photo">
+                <img src="your-photo.jpg" alt="Profile">
+            </div>
+            <div class="links">
+                <div class="link-item">
+                    <a href="link1.html">Books</a>
+                </div>
+                <div class="link-item">
+                    <a href="link2.html">Must Read</a>
+                </div>
+            </div>
+        </div>
+        <div id="blog-content" class="blog-content">
+            <div id="blog-list" class="blog-list">
+                <!-- Blog headings will be dynamically loaded here -->
+            </div>
+            <div id="blog-details" class="blog-details" style="display: none;">
+                <!-- Blog content will be dynamically loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const blogList = document.getElementById('blog-list');
+        const blogDetails = document.getElementById('blog-details');
+        const homeLink = document.getElementById('home-link');
+
+        // Fetch blog headings
+        fetch('/getData')
+            .then(response => response.json())
+            .then(data => {
+                blogList.innerHTML = '';
+                data.reverse().forEach((entry) => {
+                    const container = document.createElement('div');
+                    container.className = 'blog-container';
+
+                    const heading = document.createElement('h2');
+                    heading.className = 'blog-heading';
+                    heading.textContent = entry.Heading || 'No Title';
+                    heading.addEventListener('click', () => {
+                        showBlogContent(entry);
+                    });
+
+                    const preview = document.createElement('p');
+                    preview.className = 'blog-preview';
+                    preview.textContent = (entry.Text || '').split(' ').slice(0, 5).join(' ') + '...';
+
+                    container.appendChild(heading);
+                    container.appendChild(preview);
+                    blogList.appendChild(container);
+                });
+            })
+            .catch(err => {
+                blogList.textContent = 'Error loading data.';
+            });
+
+        // Show blog content dynamically
+        function showBlogContent(entry) {
+            blogList.style.display = 'none';
+            blogDetails.style.display = 'block';
+            blogDetails.innerHTML = `
+                <h2>${entry.Heading || 'No Title'}</h2>
+                <p>${entry.Text || 'No Content'}</p>
+            `;
+        }
+
+        // Return to blog headings when clicking Home
+        homeLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            blogList.style.display = 'block';
+            blogDetails.style.display = 'none';
+        });
+        
+        const images = [
+            'image1.jpg',
+            'image2.jpg',
+            'image3.jpg',
+            'image4.jpg'
+        ];
+
+        const changeImageDaily = () => {
+            const today = new Date().getDate();
+            const randomIndex = today % images.length;
+            const profilePhoto = document.querySelector('.profile-photo img');
+            profilePhoto.src = images[randomIndex];
+        };
+
+        window.onload = () => {
+            changeImageDaily();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data template</title>
+    <link rel="stylesheet" href="server-side.css">
+</head>
+<body>
+    <div>
+        <form method="post" action="saveData" id="main_blog">
+            <h3>Blog Title</h3>
+            <input type="text" name="Heading" required>
+            <br>
+            <h3>Blog Body</h3>
+            <textarea name="Text" id="main_bod" rows="5" placeholder="Zoom in somewhere" required></textarea>
+            <input type="file" id="imageUpload" name="image" accept="image/*">
+            <button type="submit">submit</button>
+        </form>
+    </div>
+</body>
+</html>

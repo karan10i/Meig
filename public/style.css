@@ -1,0 +1,136 @@
+/* General styling */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+}
+
+/* Header styling */
+.header {
+    width: 100%;
+    background-color: #333;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 0;
+    color: #fff;
+    position: fixed; /* Keep header fixed */
+    top: 0;
+    z-index: 1000;
+}
+
+.header a {
+    text-decoration: none;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.header a:hover {
+    color: #007BFF;
+}
+
+.header .separator {
+    color: #fff; /* Match separator color with header text */
+    font-size: 18px; /* Same size as header links */
+    margin: 0; /* Ensure no extra space */
+    padding: 0 5px; /* Add slight padding for visual clarity */
+}
+
+/* Container layout */
+.container {
+    display: flex;
+    flex-direction: row;
+    margin-top: 60px; /* Add space for fixed header */
+}
+
+/* Left column styling */
+.left-column {
+    width: 20%;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    position: fixed; /* Keep column fixed */
+    top: 60px; /* Below the header */
+    bottom: 0;
+    overflow-y: auto; /* Scrollable if content overflows */
+}
+
+.profile-photo img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px;
+}
+
+.links {
+    margin-top: 20px;
+}
+
+.link-item {
+    margin-bottom: 10px;
+}
+
+.link-item a {
+    text-decoration: none;
+    color: #333;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.link-item a:hover {
+    color: #007BFF;
+}
+
+/* Blog content styling */
+.blog-content {
+    margin-left: 25%; /* Leave space for fixed column */
+    width: 75%;
+    padding: 20px;
+}
+
+.blog-list {
+    margin-bottom: 20px;
+}
+
+.blog-container {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.blog-container:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.blog-heading {
+    margin: 0 0 10px;
+    font-size: 20px;
+    color: #333;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.blog-heading:hover {
+    color: #007BFF;
+}
+
+.blog-preview {
+    margin: 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.blog-details {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

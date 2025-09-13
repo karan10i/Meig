@@ -1,0 +1,28 @@
+#main_bod {
+    width: 400px; /* Wider input field */
+    height: 50px; /* Taller input field */
+    font-size: 16px; /* Larger text */
+    padding: 10px; /* Add padding inside the input field */
+    border: 2px solid #ccc; /* Add a border */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    background-color: #f9f9f9; /* Light background color */
+    outline: none; /* Remove default outline */
+}
+
+#main_bod:focus {
+    border-color: #007BFF; /* Highlight border on focus */
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5); /* Glow effect on focus */
+    background-color: #fff; /* Change background color on focus */
+}
+#form{
+    text-align: right;
+    margin-right: 20px;
+}
+input,button{
+    display: block;
+    margin-bottom: 10px;
+}
+body{
+    background-color: blue;
+}
