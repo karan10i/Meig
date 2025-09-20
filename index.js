@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({extended: true}));
-
+app.use('/photos', express.static(path.join(__dirname, 'photos')));
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/',(req,res)=>{
  res.sendFile(path.join(__dirname,'server-side.html'));   
@@ -26,14 +26,20 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Route to handle image and data upload
-app.post('/saveData', upload.single('image'), (req, res) => {
+app.get('/getRandomImage', (req, res) => {
+    const photosDir = path.join(__dirname, 'photos');
+    fs.readdir(photosDir, (err, files) => {
+    if (err) return res.status(500).json({ error: 'cannot read photos dir' });
+    if (!files || files.length === 0) return res.status(404).json({ error: 'no images' });
+        const randomIndex = Math.floor(Math.random() * files.length);
+        const randomImage = files[randomIndex];
+        console.log('GET /getRandomImage ->', randomImage);
+        res.json({ image: `/${path.join('photos', randomImage)}` });
+    });
+});
+app.post('/saveData', (req, res) => {
     const newData = req.body;
     const filePath = 'blg.json';
-
-    // Add image path to the blog data
-    if (req.file) {
-        newData.image = `photos/${req.file.filename}`;
-    }
 
     fs.readFile(filePath, 'utf8', (err, data) => {
         if (err) {
@@ -53,8 +59,22 @@ app.post('/saveData', upload.single('image'), (req, res) => {
     });
 
 })
-
-
+app.get('/getData', (req, res) => {
+  const filePath = path.join(__dirname, 'blg.json');
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error reading blg.json:', err);
+      return res.status(500).json({ error: 'Error reading data file' });
+    }
+    try {
+      const json = data ? JSON.parse(data) : [];
+      res.json(json);
+    } catch (parseErr) {
+      console.error('Error parsing blg.json:', parseErr);
+      res.status(500).json({ error: 'Invalid data format' });
+    }
+  });
+});
 
 app.listen(3000,()=>{
     console.log("server running");

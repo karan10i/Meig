@@ -12,14 +12,23 @@
         <span class="separator">|</span>
         <a href="conspire.html">Conspire</a>
         <span class="separator">|</span>
-        <a href="links.html">Links</a>
+<div class="dropdown">
+    <button class="dropdown-button"><a>Links</a></button>
+    <div class="dropdown-content">
+        <a href="https://www.linkedin.com/in/karan-gupta-50a298251/" style="background-color: #0077b5;">LinkedIn</a>
+        <a href="https://www.github.com/karan10i" style="background-color: #333;">GitHub</a>
+        <a href="https://philiphia.blogspot.com" style="background-color: #d6332a;">Old Blog</a>
+        <a href="https://in.pinterest.com/karangup10/" style="background-color: #bd081c;">Pinterest</a>
+        <a href="https://x.com/forwardwasit" style="background-color: #311010;">X</a>
+    </div>
+</div>
         <span class="separator">|</span>
         <a href="contact.html">Contact Us</a>
     </div>
     <div class="container">
         <div class="left-column">
             <div class="profile-photo">
-                <img src="your-photo.jpg" alt="Profile">
+                <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Profile">
             </div>
             <div class="links">
                 <div class="link-item">
@@ -44,7 +53,15 @@
         const blogList = document.getElementById('blog-list');
         const blogDetails = document.getElementById('blog-details');
         const homeLink = document.getElementById('home-link');
-
+        const myDropdown = document.getElementById('myDropdown');
+        if (myDropdown) {
+            myDropdown.addEventListener('change', function () {
+                const selectedLink = this.value;
+                if (selectedLink) {
+                    window.location.href = selectedLink; // Redirect to the selected link
+                }
+            });
+        }
         // Fetch blog headings
         fetch('/getData')
             .then(response => response.json())
@@ -90,24 +107,21 @@
             blogList.style.display = 'block';
             blogDetails.style.display = 'none';
         });
-        
-        const images = [
-            'image1.jpg',
-            'image2.jpg',
-            'image3.jpg',
-            'image4.jpg'
-        ];
-
-        const changeImageDaily = () => {
-            const today = new Date().getDate();
-            const randomIndex = today % images.length;
-            const profilePhoto = document.querySelector('.profile-photo img');
-            profilePhoto.src = images[randomIndex];
-        };
-
-        window.onload = () => {
-            changeImageDaily();
-        };
-    </script>
+   document.addEventListener('DOMContentLoaded', async () => {
+  const img = document.querySelector('.profile-photo img');
+  try {
+    const res = await fetch('/getRandomImage?t=' + Date.now(), { cache: 'no-store' });
+    console.log('GET /getRandomImage status', res.status);
+    const data = await res.json();
+    console.log('getRandomImage ->', data);
+    if (!data || !data.image) throw new Error('no image returned');
+    const path = data.image.startsWith('data:') ? data.image : (data.image.startsWith('/') ? data.image : '/' + data.image);
+    img.onload = () => console.log('image loaded:', path, img.naturalWidth, img.naturalHeight);
+    img.onerror = () => console.error('image failed to load:', path);
+    img.src = path;
+  } catch (err) {
+    console.error('fetchRandomImage error:', err);
+  }
+}); </script>
 </body>
 </html>
