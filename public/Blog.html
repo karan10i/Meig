@@ -79,7 +79,7 @@
             .then(response => response.json())
             .then(data => {
                 blogList.innerHTML = '';
-                data.reverse().forEach((entry) => {
+                data.forEach((entry) => {
                     const container = document.createElement('div');
                     container.className = 'blog-container';
 
