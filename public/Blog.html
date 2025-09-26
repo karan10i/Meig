@@ -107,10 +107,14 @@
         function showBlogContent(entry) {
             blogList.style.display = 'none';
             blogDetails.style.display = 'block';
-            blogDetails.innerHTML = `
-                <h2>${entry.Heading || 'No Title'}</h2>
-                <p>${entry.Text || 'No Content'}</p>
-            `;
+            blogDetails.innerHTML = ``;
+            const heading = document.createElement('h2');
+            heading.textContent = entry.Heading || 'No Title';
+
+            const txt = document.createElement('p');
+            txt.textContent = entry.Text || 'No Content';
+            blogDetails.append(heading);
+            blogDetails.append(txt);
         }
 
         // Return to blog headings when clicking Home
