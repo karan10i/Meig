@@ -9,7 +9,7 @@ app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({extended: true}));
 app.use('/photos', express.static(path.join(__dirname, 'photos')));
 app.use(express.static(path.join(__dirname, 'public')));
-app.get('/',(req,res)=>{
+app.get('/entry',(req,res)=>{
  res.sendFile(path.join(__dirname,'server-side.html'));   
 })
 
