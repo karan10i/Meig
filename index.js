@@ -9,9 +9,12 @@ app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({extended: true}));
 app.use('/photos', express.static(path.join(__dirname, 'photos')));
 app.use(express.static(path.join(__dirname, 'public')));
-app.get('/entry',(req,res)=>{
- res.sendFile(path.join(__dirname,'server-side.html'));   
+app.get('/',(req,res)=>{
+ res.sendFile(path.join(__dirname, 'public', 'blog.html'));   
 })
+app.get('/entry', (req, res) => {
+    res.sendFile(path.join(__dirname, 'server-side.html')); 
+});
 
 // Configure multer for image uploads
 const storage = multer.diskStorage({
