@@ -4,6 +4,9 @@ const bodyparser=require('body-parser');
 const fs = require('fs');
 const multer = require('multer'); // For handling file uploads
 const app = express();
+const imageroutes = require('./routes/imageroutes');
+
+app.use('/api', imageroutes);
 app.use(express.json());
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({extended: true}));
@@ -13,7 +16,6 @@ app.get('/entry', (req, res) => {
     res.sendFile(path.join(__dirname, 'server-side.html')); 
 });
 
-// Configure multer for image uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, path.join(__dirname, 'photos')); // Save images in 'photos' directory
@@ -26,17 +28,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Route to handle image and data upload
-app.get('/getRandomImage', (req, res) => {
-    const photosDir = path.join(__dirname, 'photos');
-    fs.readdir(photosDir, (err, files) => {
-    if (err) return res.status(500).json({ error: 'cannot read photos dir' });
-    if (!files || files.length === 0) return res.status(404).json({ error: 'no images' });
-        const randomIndex = Math.floor(Math.random() * files.length);
-        const randomImage = files[randomIndex];
-        console.log('GET /getRandomImage ->', randomImage);
-        res.json({ image: `/${path.join('photos', randomImage)}` });
-    });
-});
+
 app.post('/saveData', (req, res) => {
     const newData = req.body;
     const filePath = 'blg.json';
