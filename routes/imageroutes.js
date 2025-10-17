@@ -14,7 +14,7 @@ const storage = multer.diskStorage({
 });
 // Route to handle random image fetch
 router.get('/getRandomImage', (req, res) => {
-    const photosDir = path.join(__dirname, 'photos');
+    const photosDir = path.join(__dirname,'..', 'photos');
     fs.readdir(photosDir, (err, files) => {
     if (err) return res.status(500).json({ error: 'cannot read photos dir' });
     if (!files || files.length === 0) return res.status(404).json({ error: 'no images' });
