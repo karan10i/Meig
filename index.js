@@ -29,52 +29,8 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-<<<<<<< Updated upstream
-// Route to handle image and data upload
-
-app.post('/saveData', (req, res) => {
-    const newData = req.body;
-    const filePath = 'blg.json';
-
-    fs.readFile(filePath, 'utf8', (err, data) => {
-        if (err) {
-            console.error('Error reading file:', err);
-            return res.status(500).send('Error reading data file.');
-        }
-        let jsonData = [];
-        if (data) jsonData = JSON.parse(data);
-        jsonData.unshift(newData); 
-        fs.writeFile(filePath, JSON.stringify(jsonData, null, 2), 'utf8', (writeErr) => {
-            if (writeErr) {
-                console.error('Error writing file:', writeErr);
-                return res.status(500).send('Error saving data.');
-            }
-            res.status(200).send('Data successfully added to JSON file.');
-        });
-    });
-
-})
-app.get('/getData', (req, res) => {
-  const filePath = path.join(__dirname, 'blg.json');
-  fs.readFile(filePath, 'utf8', (err, data) => {
-    if (err) {
-      console.error('Error reading blg.json:', err);
-      return res.status(500).json({ error: 'Error reading data file' });
-    }
-    try {
-      const json = data ? JSON.parse(data) : [];
-      res.json(json);
-    } catch (parseErr) {
-      console.error('Error parsing blg.json:', parseErr);
-      res.status(500).json({ error: 'Invalid data format' });
-    }
-  });
-});
-
-=======
 app.use('/api', img_up);
 app.use('/api', dataRoutes);
->>>>>>> Stashed changes
 app.listen(3000,()=>{
     console.log("server running");
 })

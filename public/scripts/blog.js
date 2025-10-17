@@ -62,13 +62,8 @@ const blogList = document.getElementById('blog-list');
    document.addEventListener('DOMContentLoaded', async () => {
   const img = document.querySelector('.profile-photo img');
   try {
-<<<<<<< Updated upstream
-    const res = await fetch('/api?t=' + Date.now(), { cache: 'no-store' });
-    console.log('GET /api/status', res.status);
-=======
     const res = await fetch('/api/getRandomImage?t=' + Date.now(), { cache: 'no-store' });
     console.log('GET /getRandomImage status', res.status);
->>>>>>> Stashed changes
     const data = await res.json();
     console.log('getRandomImage ->', data);
     if (!data || !data.image) throw new Error('no image returned');
