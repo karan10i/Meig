@@ -3,6 +3,8 @@ const path = require('path');
 const bodyparser=require('body-parser');
 const fs = require('fs');
 const multer = require('multer'); // For handling file uploads
+const img_up = require('./routes/imageroutes');
+const dataRoutes = require('./routes/getdata');
 const app = express();
 const imageroutes = require('./routes/imageroutes');
 
@@ -27,6 +29,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+<<<<<<< Updated upstream
 // Route to handle image and data upload
 
 app.post('/saveData', (req, res) => {
@@ -68,6 +71,10 @@ app.get('/getData', (req, res) => {
   });
 });
 
+=======
+app.use('/api', img_up);
+app.use('/api', dataRoutes);
+>>>>>>> Stashed changes
 app.listen(3000,()=>{
     console.log("server running");
 })

@@ -197,3 +197,71 @@ body {
 .dropdown:hover .dropdown-content {
     display: block;
 }
+
+/* ========================================= */
+/* Responsive Styles for Mobile         */
+/* ========================================= */
+
+/* This rule applies to screens 768px wide or smaller */
+@media (max-width: 768px) {
+    /* --- Main Layout --- */
+
+    .container {
+        /* Stack the columns vertically instead of side-by-side */
+        flex-direction: column;
+        margin-top: 50px; /* Adjust margin for a potentially smaller header */
+    }
+
+    .left-column {
+        /* Un-fix the sidebar so it scrolls with the page */
+        position: static;
+        /* Make the sidebar take the full width of the screen */
+        width: 100%;
+        /* Remove the side shadow and add a bottom border for separation */
+        box-shadow: none;
+        border-bottom: 2px solid #f0f0f0;
+        /* Reset padding for a cleaner look on mobile */
+        padding: 15px;
+        box-sizing: border-box; /* Ensures padding is included in the width */
+    }
+
+    .blog-content {
+        /* Remove the margin that was making space for the sidebar */
+        margin-left: 0;
+        /* Make the main content take the full width */
+        width: 100%;
+        padding: 15px;
+        box-sizing: border-box;
+    }
+
+    /* --- Header Adjustments --- */
+
+    .header {
+        /* Allow header items to wrap onto a new line if they don't fit */
+        flex-wrap: wrap;
+        justify-content: center; /* Center items for a cleaner look when wrapped */
+    }
+
+    .header .separator {
+        /* Hide the "|" separators on mobile, as they look odd when items wrap */
+        display: none;
+    }
+
+    .header a,
+    .dropdown-button {
+        /* Add some space between nav items */
+        margin: 5px 10px;
+    }
+
+    /* --- Content Adjustments --- */
+
+    .blog-heading {
+        /* Slightly smaller heading on mobile to save space */
+        font-size: 18px;
+    }
+
+    .blog-container:hover {
+        /* Disable the zoom-on-hover effect for touch devices */
+        transform: none;
+    }
+}
