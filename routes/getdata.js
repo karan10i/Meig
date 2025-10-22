@@ -17,6 +17,11 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
+// Accept both 'blogImage' and legacy 'image' field names
+const uploadFields = upload.fields([
+  { name: 'blogImage', maxCount: 1 },
+  { name: 'image', maxCount: 1 }
+]);
 
 router.get('/getData', (req, res) => {
   // Correct path
@@ -35,11 +40,25 @@ const filePath = path.join(__dirname, '..', 'blg.json');
     }
   });
 });
-router.post('/saveData', upload.single('blogImage'), (req, res) => {
-   const newData = {
-        ...req.body,
-        image: req.file ? `/photos/${req.file.filename}` : null // Save the image path
-    };
+
+router.post('/saveData', uploadFields, (req, res) => {
+  // Debug logs to trace incoming payloads
+  console.log('POST /api/saveData Content-Type:', req.headers['content-type']);
+  console.log('Fields:', req.body);
+  const file = (req.files && req.files.blogImage && req.files.blogImage[0]) ||
+         (req.files && req.files.image && req.files.image[0]) || null;
+
+  // Basic validation to prevent empty entries
+  const { Heading, Text } = req.body || {};
+  if (!Heading || !Text) {
+    return res.status(400).json({ error: 'Heading and Text are required.' });
+  }
+
+  const newData = {
+    Heading,
+    Text,
+    image: file ? `/photos/${file.filename}` : null // Save the image path
+  };
     const filePath = path.join(__dirname, '..', 'blg.json');
 
     fs.readFile(filePath, 'utf8', (err, data) => {

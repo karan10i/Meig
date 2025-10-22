@@ -3,15 +3,6 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const router = express.Router();
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, 'photos')); // Save images in 'photos' directory
-    },
-    filename: (req, file, cb) => {
-        const uniqueName = Date.now() + '-' + file.originalname;
-        cb(null, uniqueName); // Ensure unique filenames
-    }
-});
 // Route to handle random image fetch
 router.get('/getRandomImage', (req, res) => {
     const photosDir = path.join(__dirname,'..', 'photos');
