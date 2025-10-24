@@ -5,6 +5,8 @@ const app = express();
 const imageroutes = require('./routes/imageroutes');
 const dataRoutes = require('./routes/getdata');
 // Middleware setup
+const cors = require('cors');
+app.use(cors());
 app.use(express.json());
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({extended: true}));
