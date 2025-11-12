@@ -10,12 +10,20 @@ const blogList = document.getElementById('blog-list');
                 }
             });
         }
-        // Fetch blog headings
-        fetch('/getData')
-            .then(response => response.json())
-            .then(data => {
+        // Fetch blog headings from API (with pagination structure)
+        fetch('/api/getData')
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(result => {
+                const posts = Array.isArray(result) ? result : (result && result.posts) || [];
                 blogList.innerHTML = '';
-                data.forEach((entry) => {
+                if (!posts.length) {
+                    blogList.textContent = 'No posts available yet.';
+                    return;
+                }
+                posts.forEach((entry) => {
                     const container = document.createElement('div');
                     container.className = 'blog-container';
 
@@ -61,8 +69,8 @@ const blogList = document.getElementById('blog-list');
         });
    document.addEventListener('DOMContentLoaded', async () => {
   const img = document.querySelector('.profile-photo img');
-  try {
-    const res = await fetch('/getRandomImage?t=' + Date.now(), { cache: 'no-store' });
+    try {
+        const res = await fetch('/api/getRandomImage?t=' + Date.now(), { cache: 'no-store' });
     console.log('GET /getRandomImage status', res.status);
     const data = await res.json();
     console.log('getRandomImage ->', data);
