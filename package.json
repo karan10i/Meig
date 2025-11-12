@@ -1,13 +1,22 @@
 {
-  "name": "blog",
+  "name": "personal-blog-platform",
   "version": "1.0.0",
-  "description": "",
+  "description": "A modern personal blogging platform with MongoDB, GridFS, and Blogspot import",
   "license": "ISC",
-  "author": "",
+  "author": "Karan Gupta <karan10i>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/karan10i/Meig.git"
+  },
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "dev": "node index.js",
+    "test-db": "node scripts/test-mongodb.js",
+    "check-dates": "node scripts/check-dates.js",
+    "import-blogspot": "node scripts/migration/import-blogspot.js",
+    "migrate": "node scripts/migration/migrate-to-mongodb.js"
   },
   "dependencies": {
     "axios": "^1.13.2",

@@ -1,301 +1,239 @@
 # Personal Blog Platform
 
-A modern, full-stack blog application built with Node.js, Express, and MongoDB. Features persistent storage with GridFS for images and a clean, responsive UI.
+A modern, full-stack personal blogging platform built with Node.js, Express, and MongoDB. Features include blog post creation with image uploads, pagination, GridFS storage, and Blogspot import capabilities.
 
-## 🚀 Features
+## 🌟 Features
 
-- ✅ Create and publish blog posts with rich text content
-- ✅ Upload and store images with GridFS (MongoDB)
-- ✅ Persistent cloud storage - works on Render/Heroku
-- ✅ Responsive design for mobile and desktop
-- ✅ Random profile photo display
-- ✅ Blog post preview with expand functionality
-- ✅ Secure authentication-ready architecture
-- ✅ RESTful API endpoints
-
-## 📦 Tech Stack
-
-**Backend:**
-- Node.js
-- Express.js
-- MongoDB with GridFS
-- Multer (file uploads)
-
-**Frontend:**
-- Vanilla JavaScript
-- HTML5/CSS3
-- Responsive design
-
-**Deployment:**
-- Render (hosting)
-- MongoDB Atlas (database)
-
-## 🛠️ Installation
-
-### Prerequisites
-
-- Node.js (v14 or higher)
-- MongoDB Atlas account (free tier works)
-- Git
-
-### Local Setup
-
-1. **Clone the repository:**
-```bash
-git clone https://github.com/karan10i/Meig.git
-cd Meig
-```
-
-2. **Install dependencies:**
-```bash
-npm install
-```
-
-3. **Set up environment variables:**
-
-Create a `.env` file in the root directory:
-```bash
-MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/blogDB?retryWrites=true&w=majority
-```
-
-Replace `<username>`, `<password>`, and `<cluster>` with your MongoDB Atlas credentials.
-
-4. **Migrate existing data (optional):**
-
-If you have existing blog data in `blg.json`:
-```bash
-node migrate-to-mongodb.js
-```
-
-5. **Start the server:**
-```bash
-node index.js
-```
-
-Server will run on `http://localhost:3000`
+- **Create & Manage Blog Posts**: Write and publish blog posts with rich text and images
+- **MongoDB Atlas Storage**: Cloud-based persistent storage for all data
+- **GridFS Image Storage**: Binary image files stored in MongoDB (no filesystem dependency)
+- **Pagination**: Browse posts efficiently with 10 posts per page
+- **Blogspot Import**: Migrate existing posts from Blogspot with original dates
+- **Chronological Sorting**: Newest posts displayed first automatically
+- **Responsive Design**: Clean, modern UI optimized for all devices
+- **Dynamic Profile Images**: Random profile image rotation on page navigation
 
 ## 📁 Project Structure
 
 ```
 Blog/
-├── routes/
-│   ├── db.js              # MongoDB connection module
-│   ├── getdata.js         # Blog posts API routes
-│   └── imageroutes.js     # Random image routes
-├── public/
-│   ├── Blog.html          # Main blog display page
-│   ├── contact.html       # Contact page
-│   ├── cons.html          # Conspire page
-│   ├── style.css          # Main styles
-│   ├── server-side.css    # Entry form styles
+├── index.js                           # Express server entry point
+├── package.json                       # Dependencies and scripts
+├── .env                              # Environment variables (gitignored)
+├── .gitignore                        # Git ignore rules
+├── LICENSE                           # ISC License
+├── README.md                         # This file
+├── MONGODB_SCHEMA.md                 # Database schema documentation
+├── BLOGSPOT_MIGRATION.md             # Blogspot import guide
+│
+├── routes/                           # Backend API routes
+│   ├── db.js                        # MongoDB connection module
+│   ├── getdata.js                   # Blog CRUD operations
+│   └── imageroutes.js               # Random image endpoint
+│
+├── views/                            # HTML templates
+│   └── entry.html                   # Blog post creation form
+│
+├── public/                           # Frontend static files
+│   ├── Blog.html                    # Main blog display page
+│   ├── cons.html                    # Console/admin page
+│   ├── contact.html                 # Contact page
+│   ├── style.css                    # Main stylesheet
+│   ├── server-side.css              # Entry form styles
 │   └── scripts/
-│       ├── blog.js        # Blog display logic
-│       └── cons.js        # Conspire page logic
-├── photos/                # Local photos (legacy)
-├── index.js               # Express server entry point
-├── server-side.html       # Blog entry form
-├── migrate-to-mongodb.js  # Migration script
-├── MONGODB_SCHEMA.md      # Database schema documentation
-├── package.json           # Dependencies
-├── .env                   # Environment variables (not tracked)
-└── .gitignore             # Git ignore rules
+│       ├── blog.js                  # Blog display & pagination
+│       └── cons.js                  # Console functionality
+│
+├── photos/                           # Profile images (gitignored)
+│
+└── scripts/                          # Utility scripts
+    ├── migration/
+    │   ├── migrate-to-mongodb.js    # JSON to MongoDB migration
+    │   ├── import-blogspot.js       # Blogspot post importer
+    │   └── fix-migrated-dates.js    # Date correction script
+    ├── check-dates.js               # Date verification utility
+    ├── analyze-manual-posts.js      # Post analysis tool
+    ├── fix-dates.js                 # Date updater
+    └── test-mongodb.js              # DB connection test
 ```
 
-## 🔌 API Endpoints
+## 🚀 Quick Start
 
-### Blog Posts
+### Prerequisites
 
-#### `GET /api/getData`
-Fetch all blog posts (sorted by newest first)
+- Node.js v14+ 
+- MongoDB Atlas account (free tier works)
+- npm package manager
 
-**Response:**
-```json
-[
-  {
-    "_id": "507f1f77bcf86cd799439011",
-    "Heading": "Blog Title",
-    "Text": "Blog content...",
-    "image": "/api/image/507f1f77bcf86cd799439012",
-    "createdAt": "2025-11-12T10:30:00.000Z"
-  }
-]
+### Installation
+
+1. **Clone and install**
+   ```bash
+   git clone https://github.com/karan10i/Meig.git
+   cd Blog
+   npm install
+   ```
+
+2. **Configure environment**
+   
+   Create `.env` file:
+   ```env
+   MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/blogDB?retryWrites=true&w=majority
+   ```
+
+3. **Start the server**
+   ```bash
+   node index.js
+   ```
+   
+   Server runs at `http://localhost:3000`
+
+## 📖 Usage
+
+### Creating Posts
+
+1. Navigate to `http://localhost:3000/entry`
+2. Fill in the form:
+   - **Heading**: Post title
+   - **Text**: Post content (supports line breaks)
+   - **Blog Image**: Upload image (optional)
+3. Click "Post" to publish
+
+### Viewing Posts
+
+- Visit `http://localhost:3000/Blog.html`
+- Browse with Previous/Next pagination controls
+- Latest posts appear first
+
+### Importing from Blogspot
+
+```bash
+node scripts/migration/import-blogspot.js
 ```
 
-#### `POST /api/saveData`
-Create a new blog post with optional image
-
-**Request:** `multipart/form-data`
-- `Heading` (required): Blog title
-- `Text` (required): Blog content
-- `blogImage` or `image` (optional): Image file
-
-**Response:** Redirects to `/entry`
-
-#### `GET /api/image/:id`
-Retrieve image from MongoDB GridFS
-
-**Parameters:**
-- `id`: MongoDB ObjectId of the image
-
-**Response:** Binary image data with appropriate Content-Type
-
-### Random Images
-
-#### `GET /api/getRandomImage`
-Get a random profile photo from the photos directory
-
-**Response:**
-```json
-{
-  "image": "/photos/image.jpg"
-}
-```
+Features:
+- Fetches from Blogspot Atom feed API
+- Preserves original publication dates
+- Avoids duplicates (checks by title)
+- Marks posts with `source: 'blogspot'`
 
 ## 🗄️ Database Schema
 
 ### Posts Collection
+
 ```javascript
 {
   _id: ObjectId,
-  heading: String,
-  text: String,
-  imageId: ObjectId | null,  // Reference to GridFS image
-  createdAt: Date
+  heading: String,           // Post title
+  text: String,             // Post content
+  imageId: ObjectId,        // GridFS image reference
+  publishedDate: Date,      // Publication date (for sorting)
+  createdAt: Date,          // Creation timestamp
+  source: String,           // 'manual' | 'blogspot'
+  sourceUrl: String         // Original URL (if imported)
 }
 ```
 
-### Images (GridFS)
-- **images.files** - Image metadata
-- **images.chunks** - Binary data chunks
+### GridFS Collections
 
-See [MONGODB_SCHEMA.md](MONGODB_SCHEMA.md) for detailed schema documentation.
+- `images.files`: Image metadata (filename, contentType, size)
+- `images.chunks`: Binary data in 255KB chunks
 
-## 🚀 Deployment
+See [MONGODB_SCHEMA.md](MONGODB_SCHEMA.md) for detailed documentation.
 
-### Deploy to Render
+## 🔌 API Endpoints
 
-1. **Push code to GitHub:**
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/getData?page=1&limit=10` | Paginated posts |
+| POST | `/api/saveData` | Create post (multipart/form-data) |
+| GET | `/api/image/:id` | Stream image from GridFS |
+| GET | `/api/getRandomImage` | Random profile image URL |
+| GET | `/entry` | Blog entry form |
+
+## 🛠️ Utility Scripts
+
+### Migration
 ```bash
-git add .
-git commit -m "Initial commit"
-git push origin main
+# Migrate from old JSON file to MongoDB
+node scripts/migration/migrate-to-mongodb.js
+
+# Import Blogspot posts
+node scripts/migration/import-blogspot.js
+
+# Fix post dates
+node scripts/migration/fix-migrated-dates.js
 ```
 
-2. **Create a new Web Service on Render:**
-   - Connect your GitHub repository
+### Maintenance
+```bash
+# Check post dates
+node scripts/check-dates.js
+
+# Test MongoDB connection
+node scripts/test-mongodb.js
+```
+
+## 📦 Tech Stack
+
+**Backend:**
+- Express 5.1.0 - Web framework
+- MongoDB 6.20.0 - Database driver
+- Multer 2.0.2 - File upload handling
+- Dotenv 17.2.3 - Environment config
+
+**Scraping:**
+- Axios 1.13.2 - HTTP client
+- Cheerio 1.1.2 - HTML parsing
+
+**Frontend:**
+- Vanilla JavaScript (ES6+)
+- CSS3 with Flexbox/Grid
+- Fetch API for AJAX
+
+## 🚢 Deployment (Render)
+
+1. **Push to GitHub**
+   ```bash
+   git add .
+   git commit -m "Deploy blog platform"
+   git push origin main
+   ```
+
+2. **Configure Render**
+   - Create new Web Service
+   - Connect GitHub repository `karan10i/Meig`
    - Build Command: `npm install`
    - Start Command: `node index.js`
 
-3. **Add Environment Variables:**
-   - Go to Environment tab
-   - Add `MONGODB_URI` with your MongoDB Atlas connection string
+3. **Set Environment Variables**
+   - Add `MONGODB_URI` in Render dashboard
+   - Ensure MongoDB Atlas allows Render IPs (0.0.0.0/0 for simplicity)
 
-4. **Deploy:**
-   - Render will automatically deploy on every push to main
+4. **Deploy**
+   - Render auto-deploys on git push
+   - Check logs for "✓ Connected successfully to MongoDB"
 
-### MongoDB Atlas Setup
+## 🔒 Security Notes
 
-1. Create a free cluster at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
-2. Create a database user with read/write permissions
-3. Whitelist IP addresses:
-   - For development: Your local IP
-   - For production: `0.0.0.0/0` (all IPs) or Render's IPs
-4. Get your connection string and add to `.env`
+- `.env` file is gitignored (never commit credentials)
+- MongoDB Atlas: Use strong passwords with URL encoding for special chars
+- GridFS: Images stored in database (no public file access)
+- CORS enabled for local development
 
-## 🔧 Configuration
+## 📝 License
 
-### Environment Variables
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `MONGODB_URI` | MongoDB connection string | Yes |
-
-### File Upload Limits
-
-- Max file size: 10 MB (configured in `routes/getdata.js`)
-- Supported formats: All image types (JPG, PNG, GIF, WebP, etc.)
-
-## 📝 Usage
-
-### Create a New Blog Post
-
-1. Navigate to `http://localhost:3000/entry`
-2. Fill in the blog title and content
-3. Optionally upload an image
-4. Click "Submit"
-5. Post will appear on the main blog page
-
-### View Blog Posts
-
-1. Navigate to `http://localhost:3000/Blog.html`
-2. Click on any blog heading to expand and read the full content
-3. Click "Home" to return to the list view
+ISC License - See [LICENSE](LICENSE) file
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Personal project, but feedback welcome! Open an issue for suggestions.
 
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+## 📧 Support
 
-## 📄 License
-
-This project is licensed under the ISC License.
-
-## 👤 Author
-
-**Karan Gupta**
-- GitHub: [@karan10i](https://github.com/karan10i)
-- LinkedIn: [Karan Gupta](https://www.linkedin.com/in/karan-gupta-50a298251/)
-- Blog: [Philiphia](https://philiphia.blogspot.com)
-
-## 🙏 Acknowledgments
-
-- MongoDB Atlas for free cloud database hosting
-- Render for free web service hosting
-- Express.js community for excellent documentation
-
-## 📚 Additional Documentation
-
-- [MongoDB Schema Details](MONGODB_SCHEMA.md) - Complete database schema and API documentation
-- [Migration Guide](migrate-to-mongodb.js) - Script for migrating from JSON to MongoDB
-
-## 🐛 Troubleshooting
-
-**Server won't start:**
-- Check that MongoDB URI in `.env` is correct
-- Verify MongoDB Atlas IP whitelist includes your IP
-- Ensure Node.js version is 14 or higher
-
-**Images not displaying:**
-- Check if images were uploaded to GridFS
-- Verify image route `/api/image/:id` is accessible
-- Check browser console for 404 errors
-
-**Posts not saving:**
-- Verify form has `enctype="multipart/form-data"`
-- Check server logs for errors
-- Ensure MongoDB connection is active
-
-**Migration fails:**
-- Ensure `blg.json` exists and is valid JSON
-- Check that photos exist in `photos/` directory
-- Verify MongoDB connection string
-
-## 🔮 Future Enhancements
-
-- [ ] User authentication with Auth0
-- [ ] Post categories and tags
-- [ ] Search functionality
-- [ ] Comment system
-- [ ] Rich text editor
-- [ ] Draft posts
-- [ ] Post analytics
-- [ ] Social media sharing
+Questions? Visit `/contact.html` or open a GitHub issue.
 
 ---
 
-Made with ❤️ by Karan Gupta
+**Built with ❤️ by [Karan Gupta](https://github.com/karan10i)**  
+*Powered by Node.js, Express, and MongoDB Atlas*

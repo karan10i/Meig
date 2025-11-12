@@ -20,7 +20,7 @@ app.use('/api', imageroutes);
 app.use('/api', dataRoutes);
 
 app.get('/entry', (req, res) => {
-    res.sendFile(path.join(__dirname, 'server-side.html')); 
+    res.sendFile(path.join(__dirname, 'views', 'entry.html')); 
 });
 
 // Connect to MongoDB before starting the server

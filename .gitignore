@@ -1,13 +1,10 @@
+# Environment variables
 .env
 
 # Node modules
 node_modules/
 
-# Old JSON backup files
-blg.json.bak
-blg.json.old
-
-# Local photos (since they're now in MongoDB)
+# Local photos (since they're stored in MongoDB GridFS)
 photos/
 
 # macOS files
@@ -20,6 +17,3 @@ npm-debug.log*
 # IDE files
 .vscode/
 .idea/
-
-# Test files (optional)
-test-*.js
