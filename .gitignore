@@ -1,1 +1,25 @@
 .env
+
+# Node modules
+node_modules/
+
+# Old JSON backup files
+blg.json.bak
+blg.json.old
+
+# Local photos (since they're now in MongoDB)
+photos/
+
+# macOS files
+.DS_Store
+
+# Log files
+*.log
+npm-debug.log*
+
+# IDE files
+.vscode/
+.idea/
+
+# Test files (optional)
+test-*.js

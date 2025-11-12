@@ -18,11 +18,26 @@ const uploadFields = upload.fields([
   { name: 'image', maxCount: 1 }
 ]);
 
-// GET all blog posts from MongoDB
+// GET all blog posts from MongoDB with pagination
 router.get('/getData', async (req, res) => {
   try {
     const db = getDB();
-    const posts = await db.collection('posts').find({}).sort({ createdAt: -1 }).toArray();
+    
+    // Pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    
+    // Get total count
+    const total = await db.collection('posts').countDocuments();
+    
+    // Get paginated posts
+    const posts = await db.collection('posts')
+      .find({})
+      .sort({ publishedDate: -1, createdAt: -1 }) // Sort by publishedDate first, then createdAt
+      .skip(skip)
+      .limit(limit)
+      .toArray();
     
     // Transform MongoDB documents to match your frontend format
     const formattedPosts = posts.map(post => ({
@@ -30,10 +45,24 @@ router.get('/getData', async (req, res) => {
       Heading: post.heading,
       Text: post.text,
       image: post.imageId ? `/api/image/${post.imageId}` : null,
-      createdAt: post.createdAt
+      publishedDate: post.publishedDate || post.createdAt,
+      createdAt: post.createdAt,
+      source: post.source || 'manual',
+      sourceUrl: post.sourceUrl || null
     }));
     
-    res.json(formattedPosts);
+    // Send response with pagination metadata
+    res.json({
+      posts: formattedPosts,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalPosts: total,
+        postsPerPage: limit,
+        hasNextPage: page < Math.ceil(total / limit),
+        hasPrevPage: page > 1
+      }
+    });
   } catch (error) {
     console.error('Error fetching posts from MongoDB:', error);
     res.status(500).json({ error: 'Error fetching data' });
@@ -107,12 +136,13 @@ router.post('/saveData', uploadFields, async (req, res) => {
       console.log('✓ Image uploaded to GridFS with ID:', imageId);
     }
 
-    // Save post with image reference
+    // Save post with image reference and dates
     const newPost = {
       heading: Heading,
       text: Text,
       imageId: imageId,
-      createdAt: new Date()
+      publishedDate: new Date(), // When post goes live
+      createdAt: new Date()       // When post was created
     };
 
     await db.collection('posts').insertOne(newPost);
