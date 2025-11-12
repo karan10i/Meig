@@ -3,21 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Us</title>
+    <title>Contact Us ✉️</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .contact-container {
+            max-width: 600px;
+            margin: 120px auto 40px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .contact-container h1 {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+            font-size: 36px;
+        }
+        
+        .contact-container form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .contact-container label {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .contact-container input,
+        .contact-container textarea {
+            padding: 14px 18px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        .contact-container input:focus,
+        .contact-container textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+        }
+        
+        .contact-container textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .contact-container button {
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+        }
+        
+        .contact-container button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
+        }
+        
+        @media screen and (max-width: 768px) {
+            .contact-container {
+                margin: 100px 20px 40px;
+                padding: 28px 20px;
+            }
+            
+            .contact-container h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Contact Us</h1>
-    <form action="/contact" method="POST">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required>
+    <div class="header"> 
+        <a href="Blog.html">Home</a>
+        <span class="separator">|</span>
+        <a href="conspire.html">Conspire</a>
+        <span class="separator">|</span>
+        <div class="dropdown">
+            <button class="dropdown-button"><a>Links</a></button>
+            <div class="dropdown-content">
+                <a href="https://www.linkedin.com/in/karan-gupta-50a298251/">LinkedIn</a>
+                <a href="https://www.github.com/karan10i">GitHub</a>
+                <a href="https://philiphia.blogspot.com">Old Blog</a>
+                <a href="https://in.pinterest.com/karangup10/">Pinterest</a>
+                <a href="https://x.com/forwardwasit">X</a>
+            </div>
+        </div>
+        <span class="separator">|</span>
+        <a href="contact.html">Contact Us</a>
+    </div>
+    
+    <div class="contact-container">
+        <h1>Get in Touch 💬</h1>
+        <form action="/contact" method="POST">
+            <div>
+                <label for="name">Your Name</label>
+                <input type="text" id="name" name="name" placeholder="Enter your name" required>
+            </div>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
+            <div>
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="your@email.com" required>
+            </div>
 
-        <label for="message">Message:</label>
-        <textarea id="message" name="message" required></textarea>
+            <div>
+                <label for="message">Message</label>
+                <textarea id="message" name="message" placeholder="What would you like to say?" required></textarea>
+            </div>
 
-        <button type="submit">Send Message</button>
-    </form>
+            <button type="submit">Send Message ✨</button>
+        </form>
+    </div>
 </body>
 </html>
