@@ -2,6 +2,10 @@ const blogList = document.getElementById('blog-list');
         const blogDetails = document.getElementById('blog-details');
         const homeLink = document.getElementById('home-link');
         const myDropdown = document.getElementById('myDropdown');
+        
+        let currentPage = 1;
+        let totalPages = 1;
+        
         if (myDropdown) {
             myDropdown.addEventListener('change', function () {
                 const selectedLink = this.value;
@@ -10,42 +14,110 @@ const blogList = document.getElementById('blog-list');
                 }
             });
         }
+        
         // Fetch blog headings from API (with pagination structure)
-        fetch('/api/getData')
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-            })
-            .then(result => {
-                const posts = Array.isArray(result) ? result : (result && result.posts) || [];
-                blogList.innerHTML = '';
-                if (!posts.length) {
-                    blogList.textContent = 'No posts available yet.';
-                    return;
-                }
-                posts.forEach((entry) => {
-                    const container = document.createElement('div');
-                    container.className = 'blog-container';
+        function loadBlogPage(page = 1) {
+            fetch(`/api/getData?page=${page}&limit=5`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(result => {
+                    const posts = Array.isArray(result) ? result : (result && result.posts) || [];
+                    blogList.innerHTML = '';
+                    
+                    if (!posts.length) {
+                        blogList.innerHTML = '<p class="no-posts">No posts available yet.</p>';
+                        return;
+                    }
+                    
+                    posts.forEach((entry) => {
+                        const container = document.createElement('div');
+                        container.className = 'blog-container';
 
-                    const heading = document.createElement('h2');
-                    heading.className = 'blog-heading';
-                    heading.textContent = entry.Heading || 'No Title';
-                    heading.addEventListener('click', () => {
-                        showBlogContent(entry);
+                        const heading = document.createElement('h2');
+                        heading.className = 'blog-heading';
+                        heading.textContent = entry.Heading || 'No Title';
+                        heading.addEventListener('click', () => {
+                            showBlogContent(entry);
+                        });
+
+                        const preview = document.createElement('p');
+                        preview.className = 'blog-preview';
+                        preview.textContent = (entry.Text || '').split(' ').slice(0, 5).join(' ') + '...';
+
+                        container.appendChild(heading);
+                        container.appendChild(preview);
+                        blogList.appendChild(container);
                     });
-
-                    const preview = document.createElement('p');
-                    preview.className = 'blog-preview';
-                    preview.textContent = (entry.Text || '').split(' ').slice(0, 5).join(' ') + '...';
-
-                    container.appendChild(heading);
-                    container.appendChild(preview);
-                    blogList.appendChild(container);
+                    
+                    // Update pagination info
+                    if (result.pagination) {
+                        currentPage = result.pagination.currentPage;
+                        totalPages = result.pagination.totalPages;
+                        updatePaginationControls();
+                    }
+                })
+                .catch(err => {
+                    blogList.innerHTML = '<p class="error-message">Error loading data.</p>';
+                    console.error('Fetch error:', err);
                 });
-            })
-            .catch(err => {
-                blogList.textContent = 'Error loading data.';
-            });
+        }
+        
+        function updatePaginationControls() {
+            let paginationDiv = document.getElementById('pagination-controls');
+            if (!paginationDiv) {
+                paginationDiv = document.createElement('div');
+                paginationDiv.id = 'pagination-controls';
+                paginationDiv.className = 'pagination-controls';
+                blogList.parentElement.appendChild(paginationDiv);
+            }
+            
+            paginationDiv.innerHTML = '';
+            
+            if (totalPages <= 1) {
+                paginationDiv.style.display = 'none';
+                return;
+            }
+            
+            paginationDiv.style.display = 'flex';
+            
+            // Previous button
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'pagination-btn';
+            prevBtn.textContent = '← Previous';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => {
+                if (currentPage > 1) {
+                    loadBlogPage(currentPage - 1);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            };
+            
+            // Page indicator
+            const pageInfo = document.createElement('span');
+            pageInfo.className = 'page-info';
+            pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+            
+            // Next button
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'pagination-btn';
+            nextBtn.textContent = 'Next →';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => {
+                if (currentPage < totalPages) {
+                    loadBlogPage(currentPage + 1);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            };
+            
+            paginationDiv.appendChild(prevBtn);
+            paginationDiv.appendChild(pageInfo);
+            paginationDiv.appendChild(nextBtn);
+        }
+        
+        // Initial load
+        loadBlogPage(1);
 
         // Show blog content dynamically
         function showBlogContent(entry) {
