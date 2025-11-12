@@ -1,154 +1,127 @@
 const express = require('express');
 const path = require('path');
+const multer = require('multer');
 const fs = require('fs');
-const multer = require('multer'); 
+const { getDB } = require('./db');
+const { GridFSBucket, ObjectId } = require('mongodb');
 const router = express.Router();
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, '..', 'photos')); 
-    },
-    filename: (req, file, cb) => {
-        const uniqueName = Date.now() + '-' + file.originalname;
-        cb(null, uniqueName);
-    }
+// Store files in memory for MongoDB upload
+const storage = multer.memoryStorage();
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
-const upload = multer({ storage: storage });
 const uploadFields = upload.fields([
   { name: 'blogImage', maxCount: 1 },
   { name: 'image', maxCount: 1 }
 ]);
 
-router.get('/getData', (req, res) => {
-  const filePath = path.join(__dirname, '..', 'blg.json');
-  fs.readFile(filePath, 'utf8', (err, data) => {
-    if (err) {
-      if (err.code === 'ENOENT') {
-        console.warn('blg.json not found, returning empty array');
-        return res.json([]);
-      }
-      console.error('Error reading blg.json:', err);
-      return res.status(500).json({ error: 'Error reading data file' });
-    }
-
-    try {
-      const trimmed = data && data.trim();
-      const json = trimmed ? JSON.parse(trimmed) : [];
-      return res.json(json);
-    } catch (parseErr) {
-      console.error('Error parsing blg.json:', parseErr);
-      // Attempt to repair: replace literal newlines inside JSON string literals with escaped \n
-      try {
-        const repairedText = sanitizeJsonStringLiterals(data);
-        const json = JSON.parse(repairedText);
-        // backup original file and write repaired content
-        const bakPath = filePath + '.bak';
-        fs.copyFile(filePath, bakPath, (copyErr) => {
-          if (copyErr) console.warn('Could not create backup of blg.json:', copyErr);
-          fs.writeFile(filePath, JSON.stringify(json, null, 2), 'utf8', (writeErr) => {
-            if (writeErr) console.error('Failed to write repaired blg.json:', writeErr);
-            else console.info('Repaired blg.json written; backup at', bakPath);
-          });
-        });
-        return res.json(json);
-      } catch (repairErr) {
-        console.error('Failed to auto-repair blg.json:', repairErr);
-        return res.status(500).json({ error: 'Invalid data format' });
-      }
-    }
-  });
+// GET all blog posts from MongoDB
+router.get('/getData', async (req, res) => {
+  try {
+    const db = getDB();
+    const posts = await db.collection('posts').find({}).sort({ createdAt: -1 }).toArray();
+    
+    // Transform MongoDB documents to match your frontend format
+    const formattedPosts = posts.map(post => ({
+      _id: post._id,
+      Heading: post.heading,
+      Text: post.text,
+      image: post.imageId ? `/api/image/${post.imageId}` : null,
+      createdAt: post.createdAt
+    }));
+    
+    res.json(formattedPosts);
+  } catch (error) {
+    console.error('Error fetching posts from MongoDB:', error);
+    res.status(500).json({ error: 'Error fetching data' });
+  }
 });
 
-// Replace literal CR/LF characters inside JSON string literals with escaped \n so JSON.parse will succeed.
-function sanitizeJsonStringLiterals(raw) {
-  let out = '';
-  let inString = false;
-  let escape = false;
-  for (let i = 0; i < raw.length; i++) {
-    const ch = raw[i];
-    if (!inString) {
-      if (ch === '"') {
-        inString = true;
-        out += ch;
-        escape = false;
-        continue;
-      }
-      out += ch;
-    } else {
-      // in string
-      if (escape) {
-        // previous was backslash, preserve escape and current char
-        out += ch;
-        escape = false;
-        continue;
-      }
-      if (ch === '\\') {
-        out += ch;
-        escape = true;
-        continue;
-      }
-      if (ch === '"') {
-        inString = false;
-        out += ch;
-        continue;
-      }
-      // replace raw newlines/carriage returns with escaped \n
-      if (ch === '\n') {
-        out += '\\n';
-        continue;
-      }
-      if (ch === '\r') {
-        // skip CR (it will be followed by LF) but ensure \n present
-        // peek next char
-        const next = raw[i+1];
-        if (next === '\n') {
-          // consume CR; the following LF will be handled in its iteration
-          continue;
-        }
-        out += '\\n';
-        continue;
-      }
-      out += ch;
-    }
+// GET image from MongoDB GridFS
+router.get('/image/:id', async (req, res) => {
+  try {
+    const db = getDB();
+    const bucket = new GridFSBucket(db, { bucketName: 'images' });
+    
+    const downloadStream = bucket.openDownloadStream(new ObjectId(req.params.id));
+    
+    downloadStream.on('error', (error) => {
+      console.error('Error streaming image:', error);
+      res.status(404).json({ error: 'Image not found' });
+    });
+    
+    downloadStream.on('file', (file) => {
+      res.set('Content-Type', file.contentType || 'image/jpeg');
+    });
+    
+    downloadStream.pipe(res);
+  } catch (error) {
+    console.error('Error fetching image:', error);
+    res.status(500).json({ error: 'Error fetching image' });
   }
-  return out;
-}
+});
 
-router.post('/saveData', uploadFields, (req, res) => {
-  // Debug logs to trace incoming payloads
+// POST new blog post to MongoDB with image
+router.post('/saveData', uploadFields, async (req, res) => {
   console.log('POST /api/saveData Content-Type:', req.headers['content-type']);
   console.log('Fields:', req.body);
+  
   const file = (req.files && req.files.blogImage && req.files.blogImage[0]) ||
          (req.files && req.files.image && req.files.image[0]) || null;
 
-  // Basic validation to prevent empty entries
   const { Heading, Text } = req.body || {};
   if (!Heading || !Text) {
     return res.status(400).json({ error: 'Heading and Text are required.' });
   }
 
-  const newData = {
-    Heading,
-    Text,
-    image: file ? `/photos/${file.filename}` : null // Save the image path
-  };
-    const filePath = path.join(__dirname, '..', 'blg.json');
+  try {
+    const db = getDB();
+    let imageId = null;
 
-    fs.readFile(filePath, 'utf8', (err, data) => {
-        if (err && err.code !== 'ENOENT') {
-            return res.status(500).send('Error reading data file.');
+    // Upload image to GridFS if present
+    if (file) {
+      const bucket = new GridFSBucket(db, { bucketName: 'images' });
+      const uploadStream = bucket.openUploadStream(file.originalname, {
+        contentType: file.mimetype,
+        metadata: {
+          uploadedAt: new Date(),
+          originalName: file.originalname
         }
-        const jsonData = data ? JSON.parse(data) : [];
-        jsonData.unshift(newData);
-        fs.writeFile(filePath, JSON.stringify(jsonData, null, 2), 'utf8', (writeErr) => {
-            if (writeErr) {
-                return res.status(500).send('Error saving data.');
-            }
-            // It's better to redirect after a form submission
-            res.redirect('/entry'); 
+      });
+
+      // Write buffer to GridFS
+      uploadStream.end(file.buffer);
+      
+      // Wait for upload to complete
+      await new Promise((resolve, reject) => {
+        uploadStream.on('finish', () => {
+          imageId = uploadStream.id;
+          resolve();
         });
-    });
+        uploadStream.on('error', reject);
+      });
+
+      console.log('✓ Image uploaded to GridFS with ID:', imageId);
+    }
+
+    // Save post with image reference
+    const newPost = {
+      heading: Heading,
+      text: Text,
+      imageId: imageId,
+      createdAt: new Date()
+    };
+
+    await db.collection('posts').insertOne(newPost);
+    console.log('✓ Post saved to MongoDB');
+    res.redirect('/entry');
+  } catch (error) {
+    console.error('Error saving post to MongoDB:', error);
+    res.status(500).send('Error saving data.');
+  }
 });
 
 module.exports = router;
