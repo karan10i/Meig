@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const { connectDB } = require('./routes/db');
 const dataRoutes = require('./routes/getdata');
 const contactRoutes = require('./routes/contact');
+const imageRoutes = require('./routes/imageroutes');
 const { auth, requiresAuth } = require('./routes/auth0');
 
 const app = express();
@@ -24,6 +25,7 @@ app.use('/photos', express.static(path.join(__dirname, 'photos')));
 // API routes
 app.use('/api', dataRoutes);
 app.use('/api', contactRoutes);
+app.use('/api', imageRoutes);
 
 // Protect the entry page
 app.get('/entry', requiresAuth(), (req, res) => {
