@@ -3,7 +3,8 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const { connectDB } = require('./routes/db');
 const dataRoutes = require('./routes/getdata');
-const { auth, requiresAuth } = require('./routes/auth0'); // Add this
+const contactRoutes = require('./routes/contact');
+const { auth, requiresAuth } = require('./routes/auth0');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -22,6 +23,7 @@ app.use('/photos', express.static(path.join(__dirname, 'photos')));
 
 // API routes
 app.use('/api', dataRoutes);
+app.use('/api', contactRoutes);
 
 // Protect the entry page
 app.get('/entry', requiresAuth(), (req, res) => {
