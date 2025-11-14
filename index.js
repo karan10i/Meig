@@ -1,36 +1,66 @@
 const express = require('express');
 const path = require('path');
-const bodyparser = require('body-parser');
+const bodyParser = require('body-parser');
 const { connectDB } = require('./routes/db');
-const app = express();
-const imageroutes = require('./routes/imageroutes');
 const dataRoutes = require('./routes/getdata');
+const { auth, requiresAuth } = require('./routes/auth0'); // Add this
 
-// Middleware setup
-const cors = require('cors');
-app.use(cors());
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Middleware
 app.use(express.json());
-app.use(bodyparser.json());
-app.use(bodyparser.urlencoded({extended: true}));
-app.use('/photos', express.static(path.join(__dirname, 'photos')));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
-// Routes
-app.use('/api', imageroutes);
+// Auth0 middleware - must be before routes
+app.use(auth);
+
+// Static files
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/photos', express.static(path.join(__dirname, 'photos')));
+
+// API routes
 app.use('/api', dataRoutes);
 
-app.get('/entry', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'entry.html')); 
+// Protect the entry page
+app.get('/entry', requiresAuth(), (req, res) => {
+  res.sendFile(path.join(__dirname, 'views', 'entry.html'));
 });
 
-// Connect to MongoDB before starting the server
+// Protected profile route - shows user information
+app.get('/profile', requiresAuth(), (req, res) => {
+  res.send(JSON.stringify(req.oidc.user, null, 2));
+});
+
+// Custom logout route that redirects to blog page
+app.get('/logout', (req, res) => {
+  res.oidc.logout({
+    returnTo: process.env.BASE_URL || 'http://localhost:3000'
+  });
+});
+
+// Other routes
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'Blog.html'));
+});
+
+app.get('/Blog.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'Blog.html'));
+});
+
+app.get('/contact.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'contact.html'));
+});
+
+// Start server after DB connection
 connectDB()
   .then(() => {
-    app.listen(3000, () => {
-      console.log("✓ Server running on http://localhost:3000");
+    app.listen(port, () => {
+      console.log(`✓ Server running on http://localhost:${port}`);
     });
   })
-  .catch((error) => {
-    console.error('Failed to connect to MongoDB:', error);
+  .catch(err => {
+    console.error('Failed to connect to MongoDB:', err);
     process.exit(1);
   });

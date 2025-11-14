@@ -11,16 +11,19 @@
             max-width: 600px;
             margin: 120px auto 40px;
             padding: 40px;
-            background: rgba(255, 255, 255, 0.95);
+            background: #D6F4ED;
             backdrop-filter: blur(10px);
             border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(71, 52, 114, 0.08);
+            border: 1px solid #87BAC3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         
         .contact-container h1 {
             text-align: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #473472 0%, #53629E 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -32,32 +35,38 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
+            width: 100%;
+            align-items: center;
         }
         
         .contact-container label {
             font-weight: 600;
-            color: #667eea;
+            color: #473472;
             margin-bottom: 8px;
             display: block;
+            text-align: left;
+            width: 100%;
         }
         
         .contact-container input,
         .contact-container textarea {
             padding: 14px 18px;
-            border: 2px solid rgba(102, 126, 234, 0.2);
+            border: 2px solid #87BAC3;
             border-radius: 12px;
             font-size: 15px;
             font-family: 'Inter', sans-serif;
             transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.8);
+            background: #fff;
+            width: 100%;
+            box-sizing: border-box;
         }
         
         .contact-container input:focus,
         .contact-container textarea:focus {
             outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+            border-color: #53629E;
+            background: #D6F4ED;
+            box-shadow: 0 4px 16px rgba(135, 186, 195, 0.15);
         }
         
         .contact-container textarea {
@@ -67,30 +76,34 @@
         
         .contact-container button {
             padding: 16px 32px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #53629E 0%, #87BAC3 100%);
+            color: #fff;
             border: none;
             border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 16px rgba(135, 186, 195, 0.18);
         }
         
         .contact-container button:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 8px 24px rgba(135, 186, 195, 0.28);
+            background: linear-gradient(135deg, #87BAC3 0%, #D6F4ED 100%);
+            color: #473472;
         }
         
         @media screen and (max-width: 768px) {
             .contact-container {
-                margin: 100px 20px 40px;
-                padding: 28px 20px;
+                margin: 100px 10px 40px;
+                padding: 18px 8px;
             }
-            
             .contact-container h1 {
-                font-size: 28px;
+                font-size: 24px;
+            }
+            .contact-container form {
+                gap: 14px;
             }
         }
     </style>
@@ -117,7 +130,7 @@
     
     <div class="contact-container">
         <h1>Get in Touch 💬</h1>
-        <form action="/contact" method="POST">
+        <form id="contactForm">
             <div>
                 <label for="name">Your Name</label>
                 <input type="text" id="name" name="name" placeholder="Enter your name" required>
@@ -134,7 +147,37 @@
             </div>
 
             <button type="submit">Send Message ✨</button>
+            <div id="contactStatus" style="margin-top:18px;font-weight:600;"></div>
         </form>
-    </div>
+        </div>
+        <script>
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+            const statusDiv = document.getElementById('contactStatus');
+            statusDiv.textContent = '';
+            try {
+                const res = await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, message })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    statusDiv.textContent = 'Message sent! Thank you.';
+                    statusDiv.style.color = '#53629E';
+                    document.getElementById('contactForm').reset();
+                } else {
+                    statusDiv.textContent = data.error || 'Failed to send.';
+                    statusDiv.style.color = 'red';
+                }
+            } catch (err) {
+                statusDiv.textContent = 'Error sending message.';
+                statusDiv.style.color = 'red';
+            }
+        });
+        </script>
 </body>
 </html>
