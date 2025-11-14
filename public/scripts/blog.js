@@ -35,6 +35,13 @@ const blogList = document.getElementById('blog-list');
                         const container = document.createElement('div');
                         container.className = 'blog-container';
 
+                        // Add date above the heading
+                        const dateDiv = document.createElement('div');
+                        dateDiv.className = 'blog-date';
+                        const dateObj = new Date(entry.publishedDate || entry.createdAt);
+                        dateDiv.textContent = dateObj.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+                        container.appendChild(dateDiv);
+
                         const heading = document.createElement('h2');
                         heading.className = 'blog-heading';
                         heading.textContent = entry.Heading || 'No Title';
