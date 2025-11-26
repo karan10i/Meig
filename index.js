@@ -8,6 +8,10 @@ const imageRoutes = require('./routes/imageroutes');
 const { auth, requiresAuth } = require('./routes/auth0');
 
 const app = express();
+
+// ADD THIS LINE: Trust Vercel's proxy to handle HTTPS
+app.set('trust proxy', 1);
+
 const port = process.env.PORT || 3000;
 
 // Middleware
