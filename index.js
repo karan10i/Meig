@@ -12,8 +12,11 @@ console.log('AUTH0_SECRET first 10 chars:', process.env.AUTH0_SECRET?.substring(
 console.log('==================');
 
 const express = require('express');
-const app = express();
+const bodyParser = require('body-parser'); // ADD THIS LINE
+const path = require('path');
+const { connectDB } = require('./routes/db');
 
+const app = express();
 app.set('trust proxy', 1);
 
 // Auth0 middleware - must be before routes
