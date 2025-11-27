@@ -12,9 +12,15 @@ console.log('AUTH0_SECRET first 10 chars:', process.env.AUTH0_SECRET?.substring(
 console.log('==================');
 
 const express = require('express');
-const bodyParser = require('body-parser'); // ADD THIS LINE
+const bodyParser = require('body-parser');
 const path = require('path');
 const { connectDB } = require('./routes/db');
+const { requiresAuth } = require('express-openid-connect');
+
+// Import route modules
+const dataRoutes = require('./routes/getdata');
+const contactRoutes = require('./routes/contact');
+const imageRoutes = require('./routes/imageroutes');
 
 const app = express();
 app.set('trust proxy', 1);
