@@ -1,3 +1,16 @@
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
+// DEBUG: Log environment variables
+console.log('=== ENV DEBUG ===');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('BASE_URL:', process.env.BASE_URL);
+console.log('AUTH0_SECRET exists?', !!process.env.AUTH0_SECRET);
+console.log('AUTH0_SECRET length:', process.env.AUTH0_SECRET?.length || 0);
+console.log('AUTH0_SECRET first 10 chars:', process.env.AUTH0_SECRET?.substring(0, 10));
+console.log('==================');
+
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -11,6 +24,7 @@ const app = express();
 
 // ADD THIS LINE: Trust Vercel's proxy to handle HTTPS
 app.set('trust proxy', 1);
+app.use(auth(config));
 
 const port = process.env.PORT || 3000;
 
