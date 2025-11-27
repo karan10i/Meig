@@ -12,19 +12,13 @@ console.log('AUTH0_SECRET first 10 chars:', process.env.AUTH0_SECRET?.substring(
 console.log('==================');
 
 const express = require('express');
-const path = require('path');
-const bodyParser = require('body-parser');
-const { connectDB } = require('./routes/db');
-const dataRoutes = require('./routes/getdata');
-const contactRoutes = require('./routes/contact');
-const imageRoutes = require('./routes/imageroutes');
-const { auth, requiresAuth } = require('./routes/auth0');
-
 const app = express();
 
-// ADD THIS LINE: Trust Vercel's proxy to handle HTTPS
 app.set('trust proxy', 1);
-app.use(auth(config));
+
+// Auth0 middleware - must be before routes
+const auth = require('./routes/auth0');
+app.use(auth);
 
 const port = process.env.PORT || 3000;
 
@@ -32,9 +26,6 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
-// Auth0 middleware - must be before routes
-app.use(auth);
 
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
