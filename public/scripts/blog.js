@@ -135,7 +135,7 @@ const blogList = document.getElementById('blog-list');
             heading.textContent = entry.Heading || 'No Title';
 
             const txt = document.createElement('div');
-            txt.innerHTML = entry.Text || 'No Content';
+            txt.innerHTML = entry.Text || '<p>No Content</p>';
             blogDetails.append(heading);
             blogDetails.append(txt);
         }

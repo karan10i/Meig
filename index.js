@@ -17,6 +17,10 @@ const imageRoutes = require('./routes/imageroutes');
 const app = express();
 app.set('trust proxy', 1);
 
+// Set up EJS as template engine
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
 // Auth0 middleware - must be before routes
 const auth = require('./routes/auth0');
 app.use(auth);
@@ -39,7 +43,7 @@ app.use('/api', imageRoutes);
 
 // Protect the entry page
 app.get('/entry', requiresAuth(), (req, res) => {
-  res.sendFile(path.join(__dirname, 'views', 'entry.html'));
+  res.render('entry', { tinymceApiKey: process.env.TINYMCE_API_KEY });
 });
 
 // Protected profile route - shows user information
