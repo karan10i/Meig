@@ -2,14 +2,6 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
 
-// DEBUG: Log environment variables
-console.log('=== ENV DEBUG ===');
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('BASE_URL:', process.env.BASE_URL);
-console.log('AUTH0_SECRET exists?', !!process.env.AUTH0_SECRET);
-console.log('AUTH0_SECRET length:', process.env.AUTH0_SECRET?.length || 0);
-console.log('AUTH0_SECRET first 10 chars:', process.env.AUTH0_SECRET?.substring(0, 10));
-console.log('==================');
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -24,6 +16,10 @@ const imageRoutes = require('./routes/imageroutes');
 
 const app = express();
 app.set('trust proxy', 1);
+
+// Set up EJS as template engine
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
 // Auth0 middleware - must be before routes
 const auth = require('./routes/auth0');
@@ -47,7 +43,7 @@ app.use('/api', imageRoutes);
 
 // Protect the entry page
 app.get('/entry', requiresAuth(), (req, res) => {
-  res.sendFile(path.join(__dirname, 'views', 'entry.html'));
+  res.render('entry', { tinymceApiKey: process.env.TINYMCE_API_KEY });
 });
 
 // Protected profile route - shows user information

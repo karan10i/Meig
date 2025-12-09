@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data template</title>
+    <link rel="stylesheet" href="server-side.css">
+    <script src="https://cdn.tiny.cloud/1/<%= tinymceApiKey %>/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+</head>
+<body>
+    <div>
+    <form method="post" action="/api/saveData" enctype="multipart/form-data" id="main_blog">
+            <h3>Blog Title</h3>
+            <input type="text" name="Heading" required>
+            <br>
+            <h3>Blog Body</h3>
+           <textarea id="basic-example" name="Text"></textarea>
+            <input type="file" id="imageUpload" name="blogImage" accept="image/*">
+            <button type="submit">submit</button>
+        </form>
+    </div>
+    <script>
+      tinymce.init({
+        selector: 'textarea#basic-example',
+        height: 500,
+        plugins: [
+          'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+          'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+          'insertdatetime', 'media', 'table', 'help', 'wordcount',
+          'mediaembed',
+        ],
+        toolbar: 'undo redo | blocks | ' +
+        'bold italic backcolor | alignleft aligncenter ' +
+        'alignright alignjustify | bullist numlist outdent indent | ' +
+        'removeformat | help',
+        content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px }'
+      });
+    </script>
+</body>
+</html>

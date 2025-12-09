@@ -49,12 +49,18 @@ const blogList = document.getElementById('blog-list');
                             showBlogContent(entry);
                         });
 
-                        const preview = document.createElement('p');
-                        preview.className = 'blog-preview';
-                        preview.textContent = (entry.Text || '').split(' ').slice(0, 5).join(' ') + '...';
+                        // For blog preview/summary (in the list view)
+                        const previewText = document.createElement('div');
+                        previewText.className = 'blog-preview';
+                        // Use innerHTML to render HTML, but limit the content
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = entry.Text || 'No Content';
+                        const textContent = tempDiv.textContent || tempDiv.innerText || '';
+                        const truncatedText = textContent.substring(0, 150) + (textContent.length > 150 ? '...' : '');
+                        previewText.textContent = truncatedText; // Use textContent for preview to avoid HTML injection
 
                         container.appendChild(heading);
-                        container.appendChild(preview);
+                        container.appendChild(previewText);
                         blogList.appendChild(container);
                     });
                     
@@ -134,8 +140,10 @@ const blogList = document.getElementById('blog-list');
             const heading = document.createElement('h2');
             heading.textContent = entry.Heading || 'No Title';
 
-            const txt = document.createElement('p');
-            txt.textContent = entry.Text || 'No Content';
+            // For full blog content (when viewing the complete blog)
+            const txt = document.createElement('div');
+            txt.innerHTML = entry.Text || 'No Content'; // Use innerHTML for full content
+
             blogDetails.append(heading);
             blogDetails.append(txt);
         }
