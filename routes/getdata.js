@@ -23,23 +23,26 @@ const uploadFields = upload.fields([
 router.get('/getData', async (req, res) => {
   try {
     const db = getDB();
-    
+
     // Pagination parameters
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-    
-    // Get total count
-    const total = await db.collection('posts').countDocuments();
-    
-    // Get paginated posts
+
+    // Only count and fetch posts where view is not 'private'
+    const query = { $or: [ { view: { $ne: 'private' } }, { view: { $exists: false } } ] };
+
+    // Get total count (excluding private)
+    const total = await db.collection('posts').countDocuments(query);
+
+    // Get paginated posts (excluding private)
     const posts = await db.collection('posts')
-      .find({})
-      .sort({ publishedDate: -1, createdAt: -1 }) // Sort by publishedDate first, then createdAt
+      .find(query)
+      .sort({ publishedDate: -1, createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .toArray();
-    
+
     // Transform MongoDB documents to match your frontend format
     const formattedPosts = posts.map(post => ({
       _id: post._id,
@@ -51,7 +54,7 @@ router.get('/getData', async (req, res) => {
       source: post.source || 'manual',
       sourceUrl: post.sourceUrl || null
     }));
-    
+
     // Send response with pagination metadata
     res.json({
       posts: formattedPosts,
