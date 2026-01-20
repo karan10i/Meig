@@ -2,7 +2,7 @@
 set -e
 
 echo "Starting Flask..."
-python main.py &
+python3 main.py &
 FLASK_PID=$!
 
 echo "Starting Node.js..."
