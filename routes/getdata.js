@@ -4,6 +4,7 @@ const multer = require('multer');
 const fs = require('fs');
 const { getDB } = require('./db');
 const { GridFSBucket, ObjectId } = require('mongodb');
+const axios = require('axios');
 const router = express.Router();
 
 // Store files in memory for MongoDB upload
@@ -97,15 +98,35 @@ router.get('/image/:id', async (req, res) => {
 router.post('/saveData', uploadFields, async (req, res) => {
   console.log('POST /api/saveData Content-Type:', req.headers['content-type']);
   console.log('Fields:', req.body);
-  
+
   const file = (req.files && req.files.blogImage && req.files.blogImage[0]) ||
          (req.files && req.files.image && req.files.image[0]) || null;
 
-  const { Heading, Text } = req.body || {};
+  const { Heading, Text, viewing } = req.body || {};
   if (!Heading || !Text) {
     return res.status(400).json({ error: 'Heading and Text are required.' });
   }
 
+  if (viewing === 'private') {
+    // Send data to Flask API
+    try {
+      const flaskUrl = 'http://localhost:3000/entry/private';
+      const flaskData = {
+        Heading,
+        Text,
+        view: 'private'
+        // Add more fields if needed
+      };
+      const flaskResponse = await axios.post(flaskUrl, flaskData);
+      // Handle Flask response as needed
+      return res.send(flaskResponse.data);
+    } catch (error) {
+      console.error('Error sending data to Flask:', error);
+      return res.status(500).send('Error sending data to Flask.');
+    }
+  }
+
+  // Handle public as before
   try {
     const db = getDB();
     let imageId = null;
@@ -141,6 +162,7 @@ router.post('/saveData', uploadFields, async (req, res) => {
       heading: Heading,
       text: Text,
       imageId: imageId,
+      view : 'public',
       publishedDate: new Date(), // When post goes live
       createdAt: new Date()       // When post was created
     };
@@ -153,5 +175,4 @@ router.post('/saveData', uploadFields, async (req, res) => {
     res.status(500).send('Error saving data.');
   }
 });
-
 module.exports = router;

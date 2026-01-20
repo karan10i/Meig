@@ -9,11 +9,26 @@
 </head>
 <body>
     <div>
+      <h3>Blog Title</h3>
+     
     <form method="post" action="/api/saveData" enctype="multipart/form-data" id="main_blog">
-            <h3>Blog Title</h3>
             <input type="text" name="Heading" required>
             <br>
-            <h3>Blog Body</h3>
+             <div>
+        <label for="viewing">
+          <select name="viewing" id="priv">
+            <option value="public">Public Entry</option>
+            <option value="private">Private Entry</option>
+          </select>
+        </label>
+      </div>
+      <div> 
+        <label for="private_data">
+          <select name="view" id="priv_data">
+            <option value="private_d"></option>
+          </select>
+        </label>
+      </div>
            <textarea id="basic-example" name="Text"></textarea>
             <input type="file" id="imageUpload" name="blogImage" accept="image/*">
             <button type="submit">submit</button>
