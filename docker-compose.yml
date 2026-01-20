@@ -1,14 +1,15 @@
 version: '3.8'
 
 services:
-  # Node.js/Express service
-  node:
+  # Combined Node.js and Flask service
+  app:
     build:
       context: .
-      dockerfile: Dockerfile.node
-    container_name: meig-node
+      dockerfile: Dockerfile
+    container_name: meig-app
     ports:
       - "3000:3000"
+      - "5001:5001"
     environment:
       - NODE_ENV=development
       - PORT=3000
@@ -19,29 +20,12 @@ services:
       - AUTH0_ISSUER_BASE_URL=${AUTH0_ISSUER_BASE_URL}
       - BASE_URL=${BASE_URL}
       - TINYMCE_API_KEY=${TINYMCE_API_KEY}
-    depends_on:
-      - flask
-    networks:
-      - meig-network
-    volumes:
-      - .:/app
-      - /app/node_modules
-
-  # Flask service
-  flask:
-    build:
-      context: .
-      dockerfile: Dockerfile.flask
-    container_name: meig-flask
-    ports:
-      - "5001:5001"
-    environment:
-      - MONGODB_URI=${MONGODB_URI}
       - FLASK_ENV=development
     networks:
       - meig-network
     volumes:
       - .:/app
+      - /app/node_modules
 
 networks:
   meig-network:
