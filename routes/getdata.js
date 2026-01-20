@@ -4,6 +4,7 @@ const multer = require('multer');
 const fs = require('fs');
 const { getDB } = require('./db');
 const { GridFSBucket, ObjectId } = require('mongodb');
+const axios = require('axios');
 const router = express.Router();
 
 // Store files in memory for MongoDB upload
@@ -22,23 +23,26 @@ const uploadFields = upload.fields([
 router.get('/getData', async (req, res) => {
   try {
     const db = getDB();
-    
+
     // Pagination parameters
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-    
-    // Get total count
-    const total = await db.collection('posts').countDocuments();
-    
-    // Get paginated posts
+
+    // Only count and fetch posts where view is not 'private'
+    const query = { $or: [ { view: { $ne: 'private' } }, { view: { $exists: false } } ] };
+
+    // Get total count (excluding private)
+    const total = await db.collection('posts').countDocuments(query);
+
+    // Get paginated posts (excluding private)
     const posts = await db.collection('posts')
-      .find({})
-      .sort({ publishedDate: -1, createdAt: -1 }) // Sort by publishedDate first, then createdAt
+      .find(query)
+      .sort({ publishedDate: -1, createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .toArray();
-    
+
     // Transform MongoDB documents to match your frontend format
     const formattedPosts = posts.map(post => ({
       _id: post._id,
@@ -50,7 +54,7 @@ router.get('/getData', async (req, res) => {
       source: post.source || 'manual',
       sourceUrl: post.sourceUrl || null
     }));
-    
+
     // Send response with pagination metadata
     res.json({
       posts: formattedPosts,
@@ -93,19 +97,81 @@ router.get('/image/:id', async (req, res) => {
   }
 });
 
+// GET all private posts from Flask
+router.get('/getPrivatePosts', async (req, res) => {
+  try {
+    console.log('Fetching private posts from Flask...');
+    const flaskUrl = 'http://localhost:5001/entry/private/all';
+    const flaskResponse = await axios.get(flaskUrl);
+    console.log('Private posts fetched:', flaskResponse.data);
+    res.json(flaskResponse.data);
+  } catch (error) {
+    console.error('Error fetching private posts from Flask:', error.message);
+    res.status(500).json({ error: 'Error fetching private posts. Flask server may not be running.' });
+  }
+});
+
+// GET a specific private post by ID
+router.get('/getPrivatePost/:id', async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const flaskUrl = `http://localhost:5001/entry/private/${postId}`;
+    const flaskResponse = await axios.get(flaskUrl);
+    res.json(flaskResponse.data);
+  } catch (error) {
+    console.error('Error fetching private post from Flask:', error);
+    res.status(500).json({ error: 'Error fetching private post' });
+  }
+});
+
 // POST new blog post to MongoDB with image
 router.post('/saveData', uploadFields, async (req, res) => {
   console.log('POST /api/saveData Content-Type:', req.headers['content-type']);
   console.log('Fields:', req.body);
-  
+
   const file = (req.files && req.files.blogImage && req.files.blogImage[0]) ||
          (req.files && req.files.image && req.files.image[0]) || null;
 
-  const { Heading, Text } = req.body || {};
+  const { Heading, Text, viewing, postId } = req.body || {};
   if (!Heading || !Text) {
     return res.status(400).json({ error: 'Heading and Text are required.' });
   }
 
+  if (viewing === 'private') {
+    // Send data to Flask API
+    try {
+      const flaskData = {
+        Heading,
+        Text,
+        view: 'private'
+      };
+      
+      let flaskUrl;
+      let method;
+      
+      // If postId exists, update; otherwise create
+      if (postId) {
+        flaskUrl = `http://localhost:5001/entry/private/${postId}`;
+        method = 'put';
+      } else {
+        flaskUrl = 'http://localhost:5001/entry/private';
+        method = 'post';
+      }
+      
+      const flaskResponse = await axios({
+        method: method,
+        url: flaskUrl,
+        data: flaskData
+      });
+      
+      return res.send(flaskResponse.data);
+    } catch (error) {
+      console.error('Error sending data to Flask:', error);
+      return res.status(500).send('Error sending data to Flask.');
+    }
+  }
+
+  // Handle public as before
   try {
     const db = getDB();
     let imageId = null;
@@ -141,6 +207,7 @@ router.post('/saveData', uploadFields, async (req, res) => {
       heading: Heading,
       text: Text,
       imageId: imageId,
+      view : 'public',
       publishedDate: new Date(), // When post goes live
       createdAt: new Date()       // When post was created
     };
@@ -153,5 +220,4 @@ router.post('/saveData', uploadFields, async (req, res) => {
     res.status(500).send('Error saving data.');
   }
 });
-
 module.exports = router;

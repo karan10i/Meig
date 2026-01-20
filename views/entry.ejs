@@ -9,11 +9,27 @@
 </head>
 <body>
     <div>
+      <h3>Blog Title</h3>
+     
     <form method="post" action="/api/saveData" enctype="multipart/form-data" id="main_blog">
-            <h3>Blog Title</h3>
-            <input type="text" name="Heading" required>
+            <input type="text" name="Heading" id="heading-input" required>
+            <input type="hidden" name="postId" id="postId">
             <br>
-            <h3>Blog Body</h3>
+             <div>
+        <label for="viewing">
+          <select name="viewing" id="priv">
+            <option value="public">Public Entry</option>
+            <option value="private">Private Entry</option>
+          </select>
+        </label>
+      </div>
+      <div> 
+        <label for="private_data">
+          <select name="view" id="priv_data">
+            <option value="">Select a private post to edit</option>
+          </select>
+        </label>
+      </div>
            <textarea id="basic-example" name="Text"></textarea>
             <input type="file" id="imageUpload" name="blogImage" accept="image/*">
             <button type="submit">submit</button>
@@ -35,6 +51,49 @@
         'removeformat | help',
         content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px }'
       });
+
+      // Load private posts when page loads
+      async function loadPrivatePosts() {
+        try {
+          const response = await fetch('/api/getPrivatePosts');
+          const posts = await response.json();
+          const dropdown = document.getElementById('priv_data');
+          dropdown.innerHTML = '<option value="">Select a private post to edit</option>';
+          posts.forEach(post => {
+            const option = document.createElement('option');
+            option.value = post.id;
+            option.textContent = post.heading;
+            dropdown.appendChild(option);
+          });
+        } catch (error) {
+          console.error('Error loading private posts:', error);
+        }
+      }
+
+      // Load post data when selected from dropdown
+      document.getElementById('priv_data').addEventListener('change', async function() {
+        const postId = this.value;
+        if (!postId) {
+          // Clear form
+          document.getElementById('heading-input').value = '';
+          document.getElementById('postId').value = '';
+          tinymce.get('basic-example').setContent('');
+          return;
+        }
+
+        try {
+          const response = await fetch(`/api/getPrivatePost/${postId}`);
+          const post = await response.json();
+          document.getElementById('heading-input').value = post.heading;
+          document.getElementById('postId').value = post.id;
+          tinymce.get('basic-example').setContent(post.text);
+        } catch (error) {
+          console.error('Error loading post:', error);
+        }
+      });
+
+      // Load private posts on page load
+      document.addEventListener('DOMContentLoaded', loadPrivatePosts);
     </script>
 </body>
 </html>
