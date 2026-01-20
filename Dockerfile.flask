@@ -1,6 +1,6 @@
 FROM python:3.11-alpine
 
-WORKDIR /app
+WORKDIR /
 
 # Copy requirements or install packages
 RUN pip install --no-cache-dir flask pymongo python-dotenv
@@ -12,4 +12,4 @@ COPY . .
 EXPOSE 5001
 
 # Start the Flask application
-CMD ["python", "main.py"]
+CMD ["python", "-u", "main.py"]
