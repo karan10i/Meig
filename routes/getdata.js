@@ -97,6 +97,33 @@ router.get('/image/:id', async (req, res) => {
   }
 });
 
+// GET all private posts from Flask
+router.get('/getPrivatePosts', async (req, res) => {
+  try {
+    console.log('Fetching private posts from Flask...');
+    const flaskUrl = 'http://localhost:5001/entry/private/all';
+    const flaskResponse = await axios.get(flaskUrl);
+    console.log('Private posts fetched:', flaskResponse.data);
+    res.json(flaskResponse.data);
+  } catch (error) {
+    console.error('Error fetching private posts from Flask:', error.message);
+    res.status(500).json({ error: 'Error fetching private posts. Flask server may not be running.' });
+  }
+});
+
+// GET a specific private post by ID
+router.get('/getPrivatePost/:id', async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const flaskUrl = `http://localhost:5001/entry/private/${postId}`;
+    const flaskResponse = await axios.get(flaskUrl);
+    res.json(flaskResponse.data);
+  } catch (error) {
+    console.error('Error fetching private post from Flask:', error);
+    res.status(500).json({ error: 'Error fetching private post' });
+  }
+});
+
 // POST new blog post to MongoDB with image
 router.post('/saveData', uploadFields, async (req, res) => {
   console.log('POST /api/saveData Content-Type:', req.headers['content-type']);
@@ -105,7 +132,7 @@ router.post('/saveData', uploadFields, async (req, res) => {
   const file = (req.files && req.files.blogImage && req.files.blogImage[0]) ||
          (req.files && req.files.image && req.files.image[0]) || null;
 
-  const { Heading, Text, viewing } = req.body || {};
+  const { Heading, Text, viewing, postId } = req.body || {};
   if (!Heading || !Text) {
     return res.status(400).json({ error: 'Heading and Text are required.' });
   }
@@ -113,15 +140,30 @@ router.post('/saveData', uploadFields, async (req, res) => {
   if (viewing === 'private') {
     // Send data to Flask API
     try {
-      const flaskUrl = 'http://localhost:3000/entry/private';
       const flaskData = {
         Heading,
         Text,
         view: 'private'
-        // Add more fields if needed
       };
-      const flaskResponse = await axios.post(flaskUrl, flaskData);
-      // Handle Flask response as needed
+      
+      let flaskUrl;
+      let method;
+      
+      // If postId exists, update; otherwise create
+      if (postId) {
+        flaskUrl = `http://localhost:5001/entry/private/${postId}`;
+        method = 'put';
+      } else {
+        flaskUrl = 'http://localhost:5001/entry/private';
+        method = 'post';
+      }
+      
+      const flaskResponse = await axios({
+        method: method,
+        url: flaskUrl,
+        data: flaskData
+      });
+      
       return res.send(flaskResponse.data);
     } catch (error) {
       console.error('Error sending data to Flask:', error);

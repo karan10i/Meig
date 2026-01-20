@@ -1,17 +1,12 @@
 from pymongo import MongoClient
-import os 
+import os
 
-mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017")
-config = {
-    "host": mongo_uri,
-    "port": 27017,
-    "username": os.getenv("MONGO_USERNAME", ""),
-    "password": os.getenv("MONGO_PASSWORD", ""),  
-}
+mongo_uri = os.getenv("MONGODB_URI")
+
+if not mongo_uri:
+    raise ValueError("MONGODB_URI environment variable is not set. Please set it before running the app.")
 
 class Connection:
-    def __new__(cls,database):
-        connection = MongoClient(**config)
+    def __new__(cls, database):
+        connection = MongoClient(mongo_uri)
         return connection[database]
-    
-    
