@@ -1,0 +1,15 @@
+FROM python:3.11-alpine
+
+WORKDIR /app
+
+# Copy requirements or install packages
+RUN pip install --no-cache-dir flask pymongo python-dotenv
+
+# Copy application files
+COPY . .
+
+# Expose port
+EXPOSE 5001
+
+# Start the Flask application
+CMD ["python", "main.py"]
