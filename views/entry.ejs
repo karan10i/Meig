@@ -3,97 +3,923 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data template</title>
-    <link rel="stylesheet" href="server-side.css">
+    <title>MEIG — Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.tiny.cloud/1/<%= tinymceApiKey %>/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <style>
+        :root {
+            --bg:       #0d1117;
+            --card:     #161b22;
+            --card2:    #1c2128;
+            --border:   #30363d;
+            --text:     #e6edf3;
+            --muted:    #8b949e;
+            --faint:    #6e7681;
+            --accent:   #58a6ff;
+            --green:    #3fb950;
+            --red:      #f85149;
+            --radius:   8px;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Top bar ── */
+        .topbar {
+            height: 52px;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-brand {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .topbar-links { display: flex; gap: 8px; }
+        .topbar-links a {
+            font-size: 13px;
+            color: var(--muted);
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: var(--radius);
+            transition: color .15s, background .15s;
+        }
+        .topbar-links a:hover { color: var(--text); background: var(--card2); }
+
+        /* ── Layout ── */
+        .admin-wrap {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 28px 24px 60px;
+        }
+
+        /* ── Tabs ── */
+        .tabs {
+            display: flex;
+            gap: 2px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            padding: 10px 16px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: color .15s, border-color .15s;
+        }
+
+        .tab-btn:hover { color: var(--text); }
+        .tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ── Section titles ── */
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--faint);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 10px;
+        }
+
+        /* ── Form elements ── */
+        label.field-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        input[type="text"],
+        input[type="url"],
+        select,
+        textarea.plain-ta {
+            width: 100%;
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            padding: 9px 12px;
+            transition: border-color .15s;
+            outline: none;
+        }
+
+        input[type="text"]:focus,
+        input[type="url"]:focus,
+        select:focus,
+        textarea.plain-ta:focus {
+            border-color: var(--accent);
+        }
+
+        input::placeholder, textarea::placeholder { color: var(--faint); }
+
+        select option { background: var(--card2); }
+
+        textarea.plain-ta { resize: vertical; min-height: 120px; }
+
+        .field-row {
+            margin-bottom: 16px;
+        }
+
+        .field-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* ── Buttons ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            border-radius: var(--radius);
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: background .15s, border-color .15s, color .15s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #0d1117;
+            border-color: var(--accent);
+        }
+        .btn-primary:hover { background: #79c0ff; border-color: #79c0ff; }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--muted);
+            border-color: var(--border);
+        }
+        .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+
+        .btn-danger {
+            background: transparent;
+            color: var(--red);
+            border-color: #f8514933;
+        }
+        .btn-danger:hover { background: #f8514911; }
+
+        .btn-green {
+            background: transparent;
+            color: var(--green);
+            border-color: #3fb95033;
+        }
+        .btn-green:hover { background: #3fb95011; }
+
+        /* ── Blog post form ── */
+        .post-form-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .post-row-top {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .post-row-top .field-row { flex: 1; margin: 0; }
+
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* File input */
+        .file-field {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="file"] { display: none; }
+
+        .file-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--muted);
+            font-size: 13px;
+            cursor: pointer;
+            transition: border-color .15s, color .15s;
+        }
+        .file-label:hover { border-color: var(--accent); color: var(--text); }
+
+        #file-name {
+            font-size: 13px;
+            color: var(--faint);
+        }
+
+        /* Private-post selector */
+        .private-edit-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px 14px;
+            margin-bottom: 20px;
+        }
+
+        .private-edit-bar label {
+            font-size: 12px;
+            color: var(--muted);
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .private-edit-bar select { flex: 1; }
+
+        /* ── Books tab ── */
+        .books-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .book-column {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .book-column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .book-add-form {
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px;
+            margin-bottom: 16px;
+        }
+
+        .book-add-form .field-row { margin-bottom: 10px; }
+        .book-add-form .field-row:last-child { margin: 0; }
+
+        .books-list { display: flex; flex-direction: column; gap: 8px; }
+
+        .book-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 10px 12px;
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .book-item-info { flex: 1; min-width: 0; }
+
+        .book-item-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .book-item-url {
+            font-size: 11px;
+            color: var(--faint);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+
+        .book-link-row {
+            margin-top: 6px;
+        }
+
+        .book-link-row select {
+            font-size: 12px;
+            padding: 4px 8px;
+        }
+
+        /* ── Spotify tab ── */
+        .spotify-admin {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .spotify-add-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 10px;
+            align-items: flex-end;
+            margin-bottom: 24px;
+        }
+
+        .songs-list { display: flex; flex-direction: column; gap: 8px; }
+
+        .song-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .song-num {
+            font-size: 12px;
+            color: var(--faint);
+            font-family: 'JetBrains Mono', monospace;
+            width: 20px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .song-info { flex: 1; min-width: 0; }
+
+        .song-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .song-artist {
+            font-size: 12px;
+            color: var(--faint);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ── Status / toast ── */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px 16px;
+            font-size: 13px;
+            color: var(--text);
+            box-shadow: 0 8px 24px rgba(0,0,0,.4);
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity .2s, transform .2s;
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.ok   { border-color: #3fb95066; }
+        .toast.err  { border-color: #f8514966; }
+
+        @media (max-width: 768px) {
+            .books-layout { grid-template-columns: 1fr; }
+            .spotify-add-form { grid-template-columns: 1fr 1fr; }
+            .spotify-add-form .btn { grid-column: span 2; }
+            .field-grid { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
-    <div>
-      <h3>Blog Title</h3>
-     
-    <form method="post" action="/api/saveData" enctype="multipart/form-data" id="main_blog">
-            <input type="text" name="Heading" id="heading-input" required>
+
+<!-- Top bar -->
+<div class="topbar">
+    <span class="topbar-brand">MEIG Admin</span>
+    <div class="topbar-links">
+        <a href="/">View Blog</a>
+        <a href="/logout">Log out</a>
+    </div>
+</div>
+
+<div class="admin-wrap">
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="post">New Post</button>
+        <button class="tab-btn" data-tab="books">Books</button>
+        <button class="tab-btn" data-tab="spotify">Spotify</button>
+    </div>
+
+    <!-- ── TAB: New Post ─────────────────────────────────── -->
+    <div class="tab-panel active" id="tab-post">
+
+        <!-- Edit private post bar -->
+        <div class="private-edit-bar">
+            <label>Edit private draft</label>
+            <select id="priv_data">
+                <option value="">— select a draft to load —</option>
+            </select>
+            <button class="btn btn-ghost" id="clear-draft-btn" type="button">Clear</button>
+        </div>
+
+        <form method="post" action="/api/saveData" enctype="multipart/form-data" id="main_blog">
             <input type="hidden" name="postId" id="postId">
-            <br>
-             <div>
-        <label for="viewing">
-          <select name="viewing" id="priv">
-            <option value="private">Private Entry</option>
-            <option value="public">Public Entry</option>
-          </select>
-        </label>
-      </div>
-      <div> 
-        <label for="private_data">
-          <select name="view" id="priv_data">
-            <option value="">Select a private post to edit</option>
-          </select>
-        </label>
-      </div>
-           <textarea id="basic-example" name="Text"></textarea>
-            <input type="file" id="imageUpload" name="blogImage" accept="image/*">
-            <button type="submit">submit</button>
+
+            <div class="post-form-card">
+
+                <!-- Title + visibility row -->
+                <div class="post-row-top">
+                    <div class="field-row" style="flex:2">
+                        <label class="field-label">Title</label>
+                        <input type="text" name="Heading" id="heading-input" placeholder="Post title…" required>
+                    </div>
+                    <div class="field-row" style="flex:0 0 150px">
+                        <label class="field-label">Visibility</label>
+                        <select name="viewing" id="priv">
+                            <option value="public">Public</option>
+                            <option value="private">Private draft</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- TinyMCE -->
+                <div class="field-row">
+                    <label class="field-label">Content</label>
+                    <textarea id="basic-example" name="Text"></textarea>
+                </div>
+
+                <!-- Image + submit -->
+                <div class="post-actions">
+                    <div class="file-field">
+                        <input type="file" id="imageUpload" name="blogImage" accept="image/*">
+                        <label for="imageUpload" class="file-label">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+                            Attach image
+                        </label>
+                        <span id="file-name">No file chosen</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
+                        Publish
+                    </button>
+                </div>
+            </div>
         </form>
     </div>
-    <script>
-      tinymce.init({
-        selector: 'textarea#basic-example',
-        height: 500,
-        plugins: [
-          'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-          'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-          'insertdatetime', 'media', 'table', 'help', 'wordcount',
-          'mediaembed',
-        ],
-        toolbar: 'undo redo | blocks | ' +
-        'bold italic backcolor | alignleft aligncenter ' +
-        'alignright alignjustify | bullist numlist outdent indent | ' +
-        'removeformat | help',
-        content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px }'
-      });
 
-      // Load private posts when page loads
-      async function loadPrivatePosts() {
-        try {
-          const response = await fetch('/api/getPrivatePosts');
-          const posts = await response.json();
-          const dropdown = document.getElementById('priv_data');
-          dropdown.innerHTML = '<option value="">Select a private post to edit</option>';
-          posts.forEach(post => {
-            const option = document.createElement('option');
-            option.value = post.id;
-            option.textContent = post.heading;
-            dropdown.appendChild(option);
-          });
-        } catch (error) {
-          console.error('Error loading private posts:', error);
+    <!-- ── TAB: Books ────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-books">
+        <div class="books-layout">
+
+            <!-- Currently Reading -->
+            <div class="book-column">
+                <div class="book-column-header">
+                    <span class="section-label">Current Readings</span>
+                    <button class="btn btn-ghost" id="toggle-add-reading" type="button" style="font-size:12px">+ Add</button>
+                </div>
+
+                <div class="book-add-form" id="add-reading-form" style="display:none">
+                    <div class="field-row">
+                        <label class="field-label">Title</label>
+                        <input type="text" id="r-title" placeholder="Book title">
+                    </div>
+                    <div class="field-row">
+                        <label class="field-label">Amazon / URL</label>
+                        <input type="url" id="r-url" placeholder="https://…">
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:4px">
+                        <button class="btn btn-primary" id="save-reading-btn" type="button">Save</button>
+                        <button class="btn btn-ghost" id="cancel-reading-btn" type="button">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="books-list" id="books-reading-admin"></div>
+            </div>
+
+            <!-- Must Read -->
+            <div class="book-column">
+                <div class="book-column-header">
+                    <span class="section-label">Must Read</span>
+                    <button class="btn btn-ghost" id="toggle-add-must" type="button" style="font-size:12px">+ Add</button>
+                </div>
+
+                <div class="book-add-form" id="add-must-form" style="display:none">
+                    <div class="field-row">
+                        <label class="field-label">Title</label>
+                        <input type="text" id="m-title" placeholder="Book title">
+                    </div>
+                    <div class="field-row">
+                        <label class="field-label">Amazon / URL</label>
+                        <input type="url" id="m-url" placeholder="https://…">
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:4px">
+                        <button class="btn btn-primary" id="save-must-btn" type="button">Save</button>
+                        <button class="btn btn-ghost" id="cancel-must-btn" type="button">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="books-list" id="books-must-admin"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ── TAB: Spotify ───────────────────────────────────── -->
+    <div class="tab-panel" id="tab-spotify">
+        <div class="spotify-admin">
+            <p class="section-label" style="margin-bottom:16px">Currently listening</p>
+
+            <div class="spotify-add-form">
+                <div>
+                    <label class="field-label">Song title</label>
+                    <input type="text" id="sp-title" placeholder="Song name">
+                </div>
+                <div>
+                    <label class="field-label">Artist</label>
+                    <input type="text" id="sp-artist" placeholder="Artist name">
+                </div>
+                <div>
+                    <label class="field-label">Spotify URL (optional)</label>
+                    <input type="url" id="sp-url" placeholder="https://open.spotify.com/…">
+                </div>
+                <button class="btn btn-green" id="add-song-btn" type="button">Add</button>
+            </div>
+
+            <div class="songs-list" id="songs-list"></div>
+
+            <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;">
+                <button class="btn btn-primary" id="save-spotify-btn" type="button">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+                    Save playlist
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /admin-wrap -->
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── TinyMCE ─────────────────────────────────────────────── */
+tinymce.init({
+    selector: 'textarea#basic-example',
+    height: 460,
+    skin: 'oxide-dark',
+    content_css: 'dark',
+    plugins: [
+        'advlist','autolink','lists','link','image','charmap','preview',
+        'anchor','searchreplace','visualblocks','code','fullscreen',
+        'insertdatetime','media','table','help','wordcount'
+    ],
+    toolbar: 'undo redo | blocks | bold italic | link image | ' +
+             'bullist numlist | alignleft aligncenter alignright | ' +
+             'code fullscreen | removeformat',
+    content_style: `
+        body {
+            font-family: Inter, system-ui, sans-serif;
+            font-size: 15px;
+            background: #1c2128;
+            color: #e6edf3;
+            line-height: 1.75;
+            padding: 16px 20px;
         }
-      }
+        a { color: #58a6ff; }
+        code { background: #0d1117; padding: 2px 5px; border-radius: 3px; font-size: 13px; }
+        pre  { background: #0d1117; padding: 14px; border-radius: 6px; }
+    `
+});
 
-      // Load post data when selected from dropdown
-      document.getElementById('priv_data').addEventListener('change', async function() {
-        const postId = this.value;
-        if (!postId) {
-          // Clear form
-          document.getElementById('heading-input').value = '';
-          document.getElementById('postId').value = '';
-          tinymce.get('basic-example').setContent('');
-          return;
-        }
+/* ── Tabs ────────────────────────────────────────────────── */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+});
 
-        try {
-          const response = await fetch(`/api/getPrivatePost/${postId}`);
-          const post = await response.json();
-          document.getElementById('heading-input').value = post.heading;
-          document.getElementById('postId').value = post.id;
-          tinymce.get('basic-example').setContent(post.text);
-        } catch (error) {
-          console.error('Error loading post:', error);
-        }
-      });
+/* ── Toast ───────────────────────────────────────────────── */
+function showToast(msg, type = 'ok') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast show ${type}`;
+    clearTimeout(t._tid);
+    t._tid = setTimeout(() => t.classList.remove('show'), 2800);
+}
 
-      // Load private posts on page load
-      document.addEventListener('DOMContentLoaded', loadPrivatePosts);
-    </script>
+/* ── File input label ────────────────────────────────────── */
+document.getElementById('imageUpload').addEventListener('change', e => {
+    document.getElementById('file-name').textContent = e.target.files[0]?.name || 'No file chosen';
+});
+
+/* ── Private drafts ──────────────────────────────────────── */
+async function loadPrivatePosts() {
+    try {
+        const res   = await fetch('/api/getPrivatePosts');
+        const posts = await res.json();
+        const dd    = document.getElementById('priv_data');
+        dd.innerHTML = '<option value="">— select a draft to load —</option>';
+        posts.forEach(p => {
+            const o = document.createElement('option');
+            o.value = p.id;
+            o.textContent = p.heading;
+            dd.appendChild(o);
+        });
+    } catch (e) { console.error('load drafts:', e); }
+}
+
+document.getElementById('priv_data').addEventListener('change', async function() {
+    const id = this.value;
+    if (!id) return;
+    try {
+        const res  = await fetch(`/api/getPrivatePost/${id}`);
+        const post = await res.json();
+        document.getElementById('heading-input').value = post.heading;
+        document.getElementById('postId').value = post.id;
+        tinymce.get('basic-example').setContent(post.text || '');
+        document.getElementById('priv').value = 'private';
+    } catch (e) { showToast('Failed to load draft', 'err'); }
+});
+
+document.getElementById('clear-draft-btn').addEventListener('click', () => {
+    document.getElementById('heading-input').value = '';
+    document.getElementById('postId').value = '';
+    tinymce.get('basic-example').setContent('');
+    document.getElementById('priv_data').value = '';
+});
+
+/* ── BOOKS ───────────────────────────────────────────────── */
+let allBooks = [];
+let allPosts = [];
+
+async function loadBooks() {
+    try {
+        const res = await fetch('/api/books');
+        allBooks  = await res.json();
+        renderBooksAdmin();
+    } catch (e) { console.error('load books:', e); }
+}
+
+async function loadPostsList() {
+    try {
+        const res    = await fetch('/api/getData?page=1&limit=100');
+        const result = await res.json();
+        allPosts = Array.isArray(result) ? result : (result.posts || []);
+    } catch (e) { console.error('load posts:', e); }
+}
+
+function renderBooksAdmin() {
+    renderBookList('books-reading-admin', allBooks.filter(b => b.category === 'reading'));
+    renderBookList('books-must-admin',    allBooks.filter(b => b.category === 'mustread'));
+}
+
+function renderBookList(containerId, books) {
+    const el = document.getElementById(containerId);
+    el.innerHTML = '';
+    if (!books.length) {
+        el.innerHTML = '<p style="font-size:13px;color:var(--faint)">No books yet.</p>';
+        return;
+    }
+    books.forEach(b => {
+        const item = document.createElement('div');
+        item.className = 'book-item';
+        item.dataset.id = b._id;
+
+        const info = document.createElement('div');
+        info.className = 'book-item-info';
+        info.innerHTML = `<div class="book-item-title">${esc(b.title)}</div>` +
+            (b.url ? `<div class="book-item-url">${esc(b.url)}</div>` : '');
+
+        // Post link selector
+        const linkRow = document.createElement('div');
+        linkRow.className = 'book-link-row';
+        const sel = document.createElement('select');
+        sel.title = 'Link to a blog post';
+        sel.innerHTML = '<option value="">Link to post…</option>';
+        allPosts.forEach(p => {
+            const o = document.createElement('option');
+            o.value = String(p._id);
+            o.textContent = p.Heading || 'Untitled';
+            if (Array.isArray(b.linkedPostIds) && b.linkedPostIds.includes(String(p._id))) {
+                o.selected = true;
+            }
+            sel.appendChild(o);
+        });
+        sel.addEventListener('change', () => linkBookToPost(b._id, sel.value));
+        linkRow.appendChild(sel);
+        info.appendChild(linkRow);
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn btn-danger';
+        delBtn.style.cssText = 'padding:4px 10px;font-size:12px;flex-shrink:0';
+        delBtn.textContent = 'Remove';
+        delBtn.addEventListener('click', () => deleteBook(b._id));
+
+        item.appendChild(info);
+        item.appendChild(delBtn);
+        el.appendChild(item);
+    });
+}
+
+async function addBook(category) {
+    const titleId = category === 'reading' ? 'r-title' : 'm-title';
+    const urlId   = category === 'reading' ? 'r-url'   : 'm-url';
+    const title   = document.getElementById(titleId).value.trim();
+    const url     = document.getElementById(urlId).value.trim();
+    if (!title) return showToast('Title is required', 'err');
+    try {
+        const res  = await fetch('/api/books', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, url, category })
+        });
+        const book = await res.json();
+        allBooks.push(book);
+        renderBooksAdmin();
+        document.getElementById(titleId).value = '';
+        document.getElementById(urlId).value   = '';
+        showToast('Book added');
+    } catch (e) { showToast('Failed to add book', 'err'); }
+}
+
+async function deleteBook(id) {
+    try {
+        await fetch(`/api/books/${id}`, { method: 'DELETE' });
+        allBooks = allBooks.filter(b => b._id !== id);
+        renderBooksAdmin();
+        showToast('Book removed');
+    } catch (e) { showToast('Failed to delete', 'err'); }
+}
+
+async function linkBookToPost(bookId, postId) {
+    try {
+        const book = allBooks.find(b => b._id === bookId);
+        if (!book) return;
+        const linked = postId ? [postId] : [];
+        await fetch(`/api/books/${bookId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ linkedPostIds: linked })
+        });
+        book.linkedPostIds = linked;
+        showToast(postId ? 'Linked to post' : 'Link removed');
+    } catch (e) { showToast('Failed to link', 'err'); }
+}
+
+// Book panel toggles
+document.getElementById('toggle-add-reading').addEventListener('click', () => {
+    const f = document.getElementById('add-reading-form');
+    f.style.display = f.style.display === 'none' ? 'block' : 'none';
+});
+document.getElementById('cancel-reading-btn').addEventListener('click', () => {
+    document.getElementById('add-reading-form').style.display = 'none';
+});
+document.getElementById('save-reading-btn').addEventListener('click', () => addBook('reading'));
+
+document.getElementById('toggle-add-must').addEventListener('click', () => {
+    const f = document.getElementById('add-must-form');
+    f.style.display = f.style.display === 'none' ? 'block' : 'none';
+});
+document.getElementById('cancel-must-btn').addEventListener('click', () => {
+    document.getElementById('add-must-form').style.display = 'none';
+});
+document.getElementById('save-must-btn').addEventListener('click', () => addBook('mustread'));
+
+/* ── SPOTIFY ─────────────────────────────────────────────── */
+let songs = [];
+
+async function loadSpotify() {
+    try {
+        const res = await fetch('/api/spotify');
+        songs     = await res.json();
+        renderSongs();
+    } catch (e) { console.error('load spotify:', e); }
+}
+
+function renderSongs() {
+    const el = document.getElementById('songs-list');
+    el.innerHTML = '';
+    if (!songs.length) {
+        el.innerHTML = '<p style="font-size:13px;color:var(--faint)">No songs yet. Add some above.</p>';
+        return;
+    }
+    songs.forEach((s, i) => {
+        const item = document.createElement('div');
+        item.className = 'song-item';
+
+        const num = document.createElement('span');
+        num.className = 'song-num';
+        num.textContent = i + 1;
+
+        const info = document.createElement('div');
+        info.className = 'song-info';
+        info.innerHTML = `<div class="song-title">${esc(s.title)}</div><div class="song-artist">${esc(s.artist || '')}</div>`;
+
+        const del = document.createElement('button');
+        del.className = 'btn btn-danger';
+        del.style.cssText = 'padding:4px 10px;font-size:12px';
+        del.textContent = '×';
+        del.addEventListener('click', () => {
+            songs.splice(i, 1);
+            renderSongs();
+        });
+
+        item.appendChild(num);
+        item.appendChild(info);
+        item.appendChild(del);
+        el.appendChild(item);
+    });
+}
+
+document.getElementById('add-song-btn').addEventListener('click', () => {
+    const title  = document.getElementById('sp-title').value.trim();
+    const artist = document.getElementById('sp-artist').value.trim();
+    const url    = document.getElementById('sp-url').value.trim();
+    if (!title) return showToast('Song title required', 'err');
+    songs.push({ title, artist, url });
+    renderSongs();
+    document.getElementById('sp-title').value  = '';
+    document.getElementById('sp-artist').value = '';
+    document.getElementById('sp-url').value    = '';
+});
+
+document.getElementById('save-spotify-btn').addEventListener('click', async () => {
+    try {
+        await fetch('/api/spotify', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ songs })
+        });
+        showToast('Playlist saved');
+    } catch (e) { showToast('Failed to save', 'err'); }
+});
+
+/* ── Utility ─────────────────────────────────────────────── */
+function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── Init ────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+    loadPrivatePosts();
+    loadBooks();
+    loadPostsList().then(renderBooksAdmin);
+    loadSpotify();
+});
+</script>
 </body>
 </html>

@@ -13,6 +13,7 @@ const { requiresAuth } = require('express-openid-connect');
 const dataRoutes = require('./routes/getdata');
 const contactRoutes = require('./routes/contact');
 const imageRoutes = require('./routes/imageroutes');
+const metaRoutes = require('./routes/meta');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -40,6 +41,7 @@ app.use('/photos', express.static(path.join(__dirname, 'photos')));
 app.use('/api', dataRoutes);
 app.use('/api', contactRoutes);
 app.use('/api', imageRoutes);
+app.use('/api', metaRoutes);
 
 // Protect the entry page
 app.get('/entry', requiresAuth(), (req, res) => {

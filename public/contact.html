@@ -5,106 +5,101 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Us ✉️</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         .contact-container {
-            max-width: 600px;
-            margin: 120px auto 40px;
-            padding: 40px;
-            background: #D6F4ED;
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(71, 52, 114, 0.08);
-            border: 1px solid #87BAC3;
+            max-width: 560px;
+            margin: 88px auto 48px;
+            padding: 32px 36px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        
+
         .contact-container h1 {
             text-align: center;
-            background: linear-gradient(135deg, #473472 0%, #53629E 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 30px;
-            font-size: 36px;
+            color: #e6edf3;
+            margin-bottom: 28px;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
         }
-        
+
         .contact-container form {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
             width: 100%;
-            align-items: center;
         }
-        
+
         .contact-container label {
+            font-size: 13px;
             font-weight: 600;
-            color: #473472;
-            margin-bottom: 8px;
+            color: #8b949e;
+            margin-bottom: 6px;
             display: block;
-            text-align: left;
-            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
-        
+
         .contact-container input,
         .contact-container textarea {
-            padding: 14px 18px;
-            border: 2px solid #87BAC3;
-            border-radius: 12px;
-            font-size: 15px;
+            padding: 10px 14px;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            font-size: 14px;
             font-family: 'Inter', sans-serif;
-            transition: all 0.3s ease;
-            background: #fff;
+            transition: border-color 0.15s, background 0.15s;
+            background: #1c2128;
+            color: #e6edf3;
             width: 100%;
             box-sizing: border-box;
         }
-        
+
+        .contact-container input::placeholder,
+        .contact-container textarea::placeholder {
+            color: #6e7681;
+        }
+
         .contact-container input:focus,
         .contact-container textarea:focus {
             outline: none;
-            border-color: #53629E;
-            background: #D6F4ED;
-            box-shadow: 0 4px 16px rgba(135, 186, 195, 0.15);
+            border-color: #58a6ff;
+            background: #1c2128;
         }
-        
+
         .contact-container textarea {
-            min-height: 150px;
+            min-height: 140px;
             resize: vertical;
         }
-        
+
         .contact-container button {
-            padding: 16px 32px;
-            background: linear-gradient(135deg, #53629E 0%, #87BAC3 100%);
-            color: #fff;
+            padding: 10px 24px;
+            background: #58a6ff;
+            color: #0d1117;
             border: none;
-            border-radius: 12px;
-            font-size: 16px;
+            border-radius: 8px;
+            font-size: 14px;
             font-weight: 600;
+            font-family: 'Inter', sans-serif;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 16px rgba(135, 186, 195, 0.18);
+            transition: background 0.15s;
+            align-self: flex-start;
         }
-        
+
         .contact-container button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(135, 186, 195, 0.28);
-            background: linear-gradient(135deg, #87BAC3 0%, #D6F4ED 100%);
-            color: #473472;
+            background: #79c0ff;
         }
-        
+
         @media screen and (max-width: 768px) {
             .contact-container {
-                margin: 100px 10px 40px;
-                padding: 18px 8px;
+                margin: 80px 12px 32px;
+                padding: 20px 16px;
             }
-            .contact-container h1 {
-                font-size: 24px;
-            }
-            .contact-container form {
-                gap: 14px;
-            }
+            .contact-container h1 { font-size: 22px; }
         }
     </style>
 </head>
@@ -129,7 +124,7 @@
     </div>
     
     <div class="contact-container">
-        <h1>Get in Touch 💬</h1>
+        <h1>Get in Touch</h1>
         <form id="contactForm">
             <div>
                 <label for="name">Your Name</label>
@@ -146,7 +141,7 @@
                 <textarea id="message" name="message" placeholder="What would you like to say?" required></textarea>
             </div>
 
-            <button type="submit">Send Message ✨</button>
+            <button type="submit">Send Message</button>
             <div id="contactStatus" style="margin-top:18px;font-weight:600;"></div>
         </form>
         </div>
