@@ -2,7 +2,9 @@ const express = require('express');
 const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
-const { getDB } = require('./db');
+const { getDB, getClient } = require('./db');
+
+const getPrivateDB = () => getClient().db('DB1');
 const { GridFSBucket, ObjectId } = require('mongodb');
 const router = express.Router();
 
@@ -100,7 +102,7 @@ router.get('/image/:id', async (req, res) => {
 router.get('/getPrivatePosts', async (req, res) => {
   try {
     const db = getDB();
-    const posts = await db.collection('private_posts').find({}, { projection: { _id: 1, heading: 1 } }).toArray();
+    const posts = await getPrivateDB().collection('private_posts').find({}, { projection: { _id: 1, heading: 1 } }).toArray();
     const formatted = posts.map(p => ({ id: p._id.toString(), heading: p.heading }));
     res.json(formatted);
   } catch (error) {
@@ -113,7 +115,7 @@ router.get('/getPrivatePosts', async (req, res) => {
 router.get('/getPrivatePost/:id', async (req, res) => {
   try {
     const db = getDB();
-    const post = await db.collection('private_posts').findOne({ _id: new ObjectId(req.params.id) });
+    const post = await getPrivateDB().collection('private_posts').findOne({ _id: new ObjectId(req.params.id) });
     if (!post) return res.status(404).json({ error: 'Post not found' });
     res.json({ id: post._id.toString(), heading: post.heading, text: post.text, view: post.view });
   } catch (error) {
@@ -126,7 +128,7 @@ router.get('/getPrivatePost/:id', async (req, res) => {
 router.delete('/privatePost/:id', async (req, res) => {
   try {
     const db = getDB();
-    await db.collection('private_posts').deleteOne({ _id: new ObjectId(req.params.id) });
+    await getPrivateDB().collection('private_posts').deleteOne({ _id: new ObjectId(req.params.id) });
     res.json({ message: 'Draft deleted' });
   } catch (error) {
     console.error('Error deleting draft:', error);
@@ -138,7 +140,7 @@ router.delete('/privatePost/:id', async (req, res) => {
 router.post('/publishDraft/:id', async (req, res) => {
   try {
     const db = getDB();
-    const post = await db.collection('private_posts').findOne({ _id: new ObjectId(req.params.id) });
+    const post = await getPrivateDB().collection('private_posts').findOne({ _id: new ObjectId(req.params.id) });
     if (!post) return res.status(404).json({ error: 'Draft not found' });
     await db.collection('posts').insertOne({
       heading: post.heading,
@@ -147,7 +149,7 @@ router.post('/publishDraft/:id', async (req, res) => {
       publishedDate: new Date(),
       createdAt: new Date()
     });
-    await db.collection('private_posts').deleteOne({ _id: new ObjectId(req.params.id) });
+    await getPrivateDB().collection('private_posts').deleteOne({ _id: new ObjectId(req.params.id) });
     res.json({ message: 'Published' });
   } catch (error) {
     console.error('Error publishing draft:', error);
@@ -172,13 +174,13 @@ router.post('/saveData', uploadFields, async (req, res) => {
     try {
       const db = getDB();
       if (postId) {
-        await db.collection('private_posts').updateOne(
+        await getPrivateDB().collection('private_posts').updateOne(
           { _id: new ObjectId(postId) },
           { $set: { heading: Heading, text: Text } }
         );
         return res.json({ message: 'Private Entry updated', id: postId });
       } else {
-        const result = await db.collection('private_posts').insertOne({ heading: Heading, text: Text, view: 'private' });
+        const result = await getPrivateDB().collection('private_posts').insertOne({ heading: Heading, text: Text, view: 'private' });
         return res.json({ message: 'Private Entry saved', id: result.insertedId.toString() });
       }
     } catch (error) {
