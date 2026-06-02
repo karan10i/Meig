@@ -73,14 +73,29 @@ app.get('/contact.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'contact.html'));
 });
 
-// Start server after DB connection
-connectDB()
-  .then(() => {
-    app.listen(port, () => {
-      console.log(`✓ Server running on http://localhost:${port}`);
+// Ensure DB is connected on every request (safe to call repeatedly — cached internally)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('DB connection failed:', err);
+    res.status(500).send('Database connection failed');
+  }
+});
+
+// Local dev: start the server normally
+if (require.main === module) {
+  connectDB()
+    .then(() => {
+      app.listen(port, () => {
+        console.log(`✓ Server running on http://localhost:${port}`);
+      });
+    })
+    .catch(err => {
+      console.error('Failed to connect to MongoDB:', err);
+      process.exit(1);
     });
-  })
-  .catch(err => {
-    console.error('Failed to connect to MongoDB:', err);
-    process.exit(1);
-  });
+}
+
+module.exports = app;
