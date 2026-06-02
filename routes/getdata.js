@@ -122,6 +122,39 @@ router.get('/getPrivatePost/:id', async (req, res) => {
   }
 });
 
+// DELETE a private draft
+router.delete('/privatePost/:id', async (req, res) => {
+  try {
+    const db = getDB();
+    await db.collection('private_posts').deleteOne({ _id: new ObjectId(req.params.id) });
+    res.json({ message: 'Draft deleted' });
+  } catch (error) {
+    console.error('Error deleting draft:', error);
+    res.status(500).json({ error: 'Error deleting draft' });
+  }
+});
+
+// POST publish a private draft → move to public posts
+router.post('/publishDraft/:id', async (req, res) => {
+  try {
+    const db = getDB();
+    const post = await db.collection('private_posts').findOne({ _id: new ObjectId(req.params.id) });
+    if (!post) return res.status(404).json({ error: 'Draft not found' });
+    await db.collection('posts').insertOne({
+      heading: post.heading,
+      text: post.text,
+      view: 'public',
+      publishedDate: new Date(),
+      createdAt: new Date()
+    });
+    await db.collection('private_posts').deleteOne({ _id: new ObjectId(req.params.id) });
+    res.json({ message: 'Published' });
+  } catch (error) {
+    console.error('Error publishing draft:', error);
+    res.status(500).json({ error: 'Error publishing draft' });
+  }
+});
+
 // POST new blog post to MongoDB with image
 router.post('/saveData', uploadFields, async (req, res) => {
   console.log('POST /api/saveData Content-Type:', req.headers['content-type']);
