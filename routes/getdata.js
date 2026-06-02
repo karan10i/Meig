@@ -4,7 +4,6 @@ const multer = require('multer');
 const fs = require('fs');
 const { getDB } = require('./db');
 const { GridFSBucket, ObjectId } = require('mongodb');
-const axios = require('axios');
 const router = express.Router();
 
 // Store files in memory for MongoDB upload
@@ -97,29 +96,28 @@ router.get('/image/:id', async (req, res) => {
   }
 });
 
-// GET all private posts from Flask
+// GET all private posts
 router.get('/getPrivatePosts', async (req, res) => {
   try {
-    console.log('Fetching private posts from Flask...');
-    const flaskUrl = 'http://localhost:5001/entry/private/all';
-    const flaskResponse = await axios.get(flaskUrl);
-    console.log('Private posts fetched:', flaskResponse.data);
-    res.json(flaskResponse.data);
+    const db = getDB();
+    const posts = await db.collection('private_posts').find({}, { projection: { _id: 1, heading: 1 } }).toArray();
+    const formatted = posts.map(p => ({ id: p._id.toString(), heading: p.heading }));
+    res.json(formatted);
   } catch (error) {
-    console.error('Error fetching private posts from Flask:', error.message);
-    res.status(500).json({ error: 'Error fetching private posts. Flask server may not be running.' });
+    console.error('Error fetching private posts:', error);
+    res.status(500).json({ error: 'Error fetching private posts' });
   }
 });
 
 // GET a specific private post by ID
 router.get('/getPrivatePost/:id', async (req, res) => {
   try {
-    const postId = req.params.id;
-    const flaskUrl = `http://localhost:5001/entry/private/${postId}`;
-    const flaskResponse = await axios.get(flaskUrl);
-    res.json(flaskResponse.data);
+    const db = getDB();
+    const post = await db.collection('private_posts').findOne({ _id: new ObjectId(req.params.id) });
+    if (!post) return res.status(404).json({ error: 'Post not found' });
+    res.json({ id: post._id.toString(), heading: post.heading, text: post.text, view: post.view });
   } catch (error) {
-    console.error('Error fetching private post from Flask:', error);
+    console.error('Error fetching private post:', error);
     res.status(500).json({ error: 'Error fetching private post' });
   }
 });
@@ -138,36 +136,21 @@ router.post('/saveData', uploadFields, async (req, res) => {
   }
 
   if (viewing === 'private') {
-    // Send data to Flask API
     try {
-      const flaskData = {
-        Heading,
-        Text,
-        view: 'private'
-      };
-      
-      let flaskUrl;
-      let method;
-      
-      // If postId exists, update; otherwise create
+      const db = getDB();
       if (postId) {
-        flaskUrl = `http://localhost:5001/entry/private/${postId}`;
-        method = 'put';
+        await db.collection('private_posts').updateOne(
+          { _id: new ObjectId(postId) },
+          { $set: { heading: Heading, text: Text } }
+        );
+        return res.json({ message: 'Private Entry updated', id: postId });
       } else {
-        flaskUrl = 'http://localhost:5001/entry/private';
-        method = 'post';
+        const result = await db.collection('private_posts').insertOne({ heading: Heading, text: Text, view: 'private' });
+        return res.json({ message: 'Private Entry saved', id: result.insertedId.toString() });
       }
-      
-      const flaskResponse = await axios({
-        method: method,
-        url: flaskUrl,
-        data: flaskData
-      });
-      
-      return res.send(flaskResponse.data);
     } catch (error) {
-      console.error('Error sending data to Flask:', error);
-      return res.status(500).send('Error sending data to Flask.');
+      console.error('Error saving private post:', error);
+      return res.status(500).json({ error: 'Error saving private post.' });
     }
   }
 
