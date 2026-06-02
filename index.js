@@ -37,6 +37,17 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/photos', express.static(path.join(__dirname, 'photos')));
 
+// Ensure DB is connected before any API route runs
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('DB connection failed:', err);
+    res.status(500).send('Database connection failed');
+  }
+});
+
 // API routes
 app.use('/api', dataRoutes);
 app.use('/api', contactRoutes);
@@ -71,17 +82,6 @@ app.get('/Blog.html', (req, res) => {
 
 app.get('/contact.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'contact.html'));
-});
-
-// Ensure DB is connected on every request (safe to call repeatedly — cached internally)
-app.use(async (req, res, next) => {
-  try {
-    await connectDB();
-    next();
-  } catch (err) {
-    console.error('DB connection failed:', err);
-    res.status(500).send('Database connection failed');
-  }
 });
 
 // Local dev: start the server normally
